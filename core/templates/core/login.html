@@ -1,0 +1,59 @@
+{% load static %}
+<!doctype html>
+<html>
+  <head>
+    <title>Admin Login - BSS</title>
+    <!-- Use Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Connect our new login CSS -->
+    <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+  </head>
+  <body class="login-bg">
+    <div class="login-card">
+      <!-- Top Dark Blue Half -->
+      <div class="login-header">
+        <div class="shield-icon">🛡️</div>
+        <h2>BSS Admin</h2>
+        <p>Secure Administration Portal</p>
+      </div>
+
+      <!-- Bottom White Half -->
+      <div class="login-body">
+        <h3>Sign In to Continue</h3>
+
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="input-group">
+            <label>Username (or Email)</label>
+            <div class="input-wrapper">
+              <span class="icon">✉️</span>
+              {{ form.username }}
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+              <span class="icon">🔒</span>
+              {{ form.password }}
+            </div>
+          </div>
+
+          {% if form.errors %}
+          <p class="error-msg">Invalid username or password.</p>
+          {% endif %}
+
+          <button type="submit" class="login-btn">Sign In</button>
+        </form>
+
+        <a href="{% url 'home' %}" class="back-link"
+          >← Back to Public Website</a
+        >
+      </div>
+    </div>
+  </body>
+</html>

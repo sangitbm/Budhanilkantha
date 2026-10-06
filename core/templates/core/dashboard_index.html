@@ -1,0 +1,117 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Overview{% endblock %}
+
+{% block content %}
+<style>
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+  }
+
+  .welcome-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+  }
+
+  .welcome-subtitle {
+    margin-top: 8px;
+    opacity: 0.9;
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  /* Individual color classes for the icons */
+  .icon-blue {
+    background: rgba(26, 75, 140, 0.1);
+  }
+  .icon-orange {
+    background: rgba(230, 126, 34, 0.1);
+  }
+  .icon-green {
+    background: rgba(46, 204, 113, 0.1);
+  }
+  .icon-purple {
+    background: rgba(155, 89, 182, 0.1);
+  }
+
+  .stat-title {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-top: 4px;
+  }
+</style>
+
+<div class="dashboard-grid">
+  <!-- Welcome Card -->
+  <div class="card welcome-card">
+    <h2>Welcome to the Admin Dashboard</h2>
+    <p class="welcome-subtitle">
+      Manage the Budhanilkantha School website content quickly and easily.
+    </p>
+  </div>
+
+  <!-- Stats Cards -->
+  <a href="{% url 'dashboard-notices' %}" class="card stat-card">
+    <div class="stat-icon-wrapper icon-blue">📢</div>
+    <div>
+      <h3 class="stat-title">Notices</h3>
+      <div class="stat-value">{{ notices_count }}</div>
+    </div>
+  </a>
+  
+  <a href="{% url 'dashboard-gallery' %}" class="card stat-card">
+    <div class="stat-icon-wrapper icon-orange">📸</div>
+    <div>
+      <h3 class="stat-title">Photos in Gallery</h3>
+      <div class="stat-value">{{ photos_count }}</div>
+    </div>
+  </a>
+  
+  <a href="{% url 'dashboard-students' %}" class="card stat-card">
+    <div class="stat-icon-wrapper icon-green">🎓</div>
+    <div>
+      <h3 class="stat-title">Total Students</h3>
+      <div class="stat-value">{{ students_count }}</div>
+    </div>
+  </a>
+  
+  <a href="{% url 'dashboard-staff' %}" class="card stat-card">
+    <div class="stat-icon-wrapper icon-purple">💼</div>
+    <div>
+      <h3 class="stat-title">Total Staff</h3>
+      <div class="stat-value">{{ staff_count }}</div>
+    </div>
+  </a>
+</div>
+{% endblock %}

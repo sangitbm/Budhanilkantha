@@ -1,0 +1,116 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Manage Admissions{% endblock %}
+
+{% block content %}
+<style>
+  .student-name-cell {
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+
+  .parent-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .grade-badge {
+    background: rgba(26, 75, 140, 0.1);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .contact-email {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .actions-right {
+    text-align: right;
+  }
+
+  .action-btns-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .empty-table-cell {
+    text-align: center;
+    padding: 60px;
+    color: var(--text-muted);
+  }
+
+  .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
+
+  .summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .summary-count {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  .summary-count strong {
+    color: var(--text-dark);
+  }
+</style>
+
+<div class="summary-bar">
+  <p class="summary-count">Total applications: <strong>{{ applications|length }}</strong></p>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Student Name</th>
+                <th>Grade Applying For</th>
+                <th>Contact</th>
+                <th>Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  <div class="student-name-cell">{{ app.student_name }}</div>
+                  <div class="parent-name">Parent: {{ app.parent_name }}</div>
+                </td>
+                <td>
+                  <span class="grade-badge">Grade {{ app.grade_applying_for }}</span>
+                </td>
+                <td>
+                  <div>📞 {{ app.phone_number }}</div>
+                  <div class="contact-email">✉️ {{ app.email }}</div>
+                </td>
+                <td>{{ app.submitted_at|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="empty-table-cell">
+                    <div class="empty-icon">📋</div>
+                    <p>No admission applications have been submitted yet.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

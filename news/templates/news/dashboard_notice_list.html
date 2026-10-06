@@ -1,0 +1,85 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Manage Notices{% endblock %}
+
+{% block header_actions %}
+  <a href="{% url 'add-notice' %}" class="btn btn-primary">+ Add New Notice</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .notice-title-cell {
+    font-weight: 500;
+    color: var(--text-dark);
+  }
+
+  .notice-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .notice-link:hover {
+    text-decoration: underline;
+  }
+
+  .no-attachment {
+    color: var(--text-muted);
+  }
+
+  .actions-right {
+    text-align: right;
+  }
+
+  .action-btns-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .empty-table-cell {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+</style>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date Posted</th>
+                <th>Attachment</th>
+                <th class="actions-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notice in notices %}
+            <tr>
+                <td class="notice-title-cell">{{ notice.title }}</td>
+                <td>{{ notice.created_at|date:"M d, Y" }}</td>
+                <td>
+                    {% if notice.file_attachment %}
+                    <a href="{{ notice.file_attachment.url }}" target="_blank" class="notice-link">📄 View</a>
+                    {% else %}
+                    <span class="no-attachment">—</span>
+                    {% endif %}
+                </td>
+                <td class="actions-right">
+                    <div class="action-btns-right">
+                        <a href="{% url 'edit-notice' notice.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'delete-notice' notice.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="empty-table-cell">
+                    📢 No notices have been added yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

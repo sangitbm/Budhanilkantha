@@ -1,0 +1,139 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    {% block title %} Budhanilkantha Secondary School{% endblock %}
+  </title>
+
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <!-- Our Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+
+<body>
+  <!-- Header / Navigation -->
+  <header class="site-header" style="padding: 0">
+    {% if site_settings.marquee_text %}
+    <!-- ANNOUNCEMENT BAR -->
+    <div id="announcement-bar" class="marquee-wrapper" style="background: var(--accent); color: var(--white); padding: 8px 16px; display: flex; align-items: center; justify-content: center; position: relative;">
+      <a href="{% url 'admissions' %}" style="color: var(--white); text-decoration: none; font-size: 0.95rem; font-weight: 600; text-align: center; width: 100%;">
+        {{ site_settings.marquee_text|default:"Hurry up! Admissions are open — limited seats available." }}
+      </a>
+      <button onclick="dismissAnnouncement()" style="position: absolute; right: 16px; background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; padding: 4px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <script>
+      function dismissAnnouncement() {
+        document.getElementById('announcement-bar').style.display = 'none';
+        sessionStorage.setItem('announcement_dismissed', 'true');
+      }
+      if (sessionStorage.getItem('announcement_dismissed') === 'true') {
+        document.getElementById('announcement-bar').style.display = 'none';
+      }
+    </script>
+    {% endif %}
+    
+    <!-- TOP BAR (Contact & Admin) -->
+    <div class="top-bar">
+      <div class="container">
+        <div class="top-bar-left">
+          <span>📞 {{ site_settings.phone_primary }}</span>
+          <span>✉️ {{ site_settings.email_general }}</span>
+        </div>
+        <div class="top-bar-right">
+          {% if site_settings.facebook_url %}
+          <a href="{{ site_settings.facebook_url }}" target="_blank">📘 Facebook</a>
+          {% endif %}
+          <!-- The Admin link goes straight to your custom login! -->
+          <a href="{% url 'login' %}">⚙️ Admin</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <div class="container navbar-inner" style="padding: 18px 24px;">
+      <!-- Logo -->
+      <a href="{% url 'home' %}" class="logo">
+        {% if site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.school_short_name }} Logo"
+               style="height: 48px; width: 48px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+          <div class="logo-icon">{{ site_settings.school_short_name|slice:":1" }}</div>
+        {% endif %}
+        <div class="logo-text">
+          {{ site_settings.school_short_name }}
+          <small>{{ site_settings.school_name }}</small>
+        </div>
+      </a>
+
+      <!-- Nav Links -->
+      <nav class="nav-links" id="navLinks">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'about' %}">About Us</a>
+        <a href="{% url 'public-notices' %}">Notices</a>
+
+
+        <!-- Faculty Dropdown -->
+        <div class="dropdown">
+          <a style="cursor: pointer">Faculty ▾</a>
+          <div class="dropdown-menu">
+            <a href="{% url 'teachers' %}">Teachers</a>
+            <a href="{% url 'staff-directory' %}">Staff Directory</a>
+          </div>
+        </div>
+
+        <a href="{% url 'gallery' %}">Gallery</a>
+        <a href="{% url 'events' %}">Events</a>
+        <a href="{% url 'contact' %}">Contact</a>
+        {% if site_settings.admissions_open %}
+        <a href="{% url 'admissions' %}" class="btn btn-accent nav-apply-btn">Apply Now</a>
+        {% endif %}
+      </nav>
+
+      <div class="nav-actions">
+        <button class="nav-toggle" onclick="
+              document.getElementById('navLinks').classList.toggle('open')
+            ">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main>{% block content %} {% endblock %}</main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-mission">
+        <h2>{{ site_settings.tagline }}</h2>
+        <p>
+          {% if site_settings.about_short %}{{ site_settings.about_short }}{% else %}Dedicated to providing quality education and fostering holistic development for our students.{% endif %}
+        </p>
+        <div class="btn-group">
+          <a href="{% url 'about' %}" class="btn btn-outline">Learn More</a>
+          <a href="{% url 'contact' %}" class="btn btn-primary">Contact Us</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>
+          &copy; {% now "Y" %} {{ site_settings.school_name }}. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

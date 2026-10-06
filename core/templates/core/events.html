@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upcoming Events - Budhanilkantha School{% endblock %}
+
+{% block content %}
+<style>
+  .calendar-placeholder {
+    background: var(--light-bg);
+    padding: 60px;
+    border-radius: var(--radius);
+    color: var(--text-muted);
+  }
+  
+  .placeholder-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+</style>
+
+<section class="events section-padding">
+  <div class="container text-center">
+    <h2 class="section-title">Upcoming Events</h2>
+    <p class="section-subtitle">Check out the upcoming school activities, holidays, and celebrations.</p>
+    
+    <div class="calendar-placeholder">
+      <div class="placeholder-icon">🗓️</div>
+      <h3>Calendar Coming Soon</h3>
+      <p>We are finalizing the academic calendar for the year. Please check back later!</p>
+    </div>
+    
+  </div>
+</section>
+{% endblock %}

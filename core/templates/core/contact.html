@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact - {{ site_settings.school_name }}{% endblock %}
+
+{% block content %}
+<style>
+  .contact-subtitle {
+    margin-bottom: 24px;
+  }
+  
+  .contact-card {
+    background: var(--light-bg); 
+    padding: 40px; 
+    border-radius: var(--radius); 
+    max-width: 600px; 
+    margin: 0 auto; 
+    box-shadow: var(--shadow);
+  }
+  
+  .contact-detail {
+    margin-bottom: 12px; 
+    font-size: 1.1rem;
+  }
+  
+  .contact-address {
+    font-size: 1.1rem;
+  }
+  
+  .text-primary-color {
+    color: var(--primary);
+  }
+  
+  .text-muted-color {
+    color: var(--text-muted);
+  }
+</style>
+
+<section class="section-padding">
+  <div class="container text-center">
+    <h2 class="section-title">Contact Information</h2>
+    
+    <p class="section-subtitle contact-subtitle">Get in touch with us for any inquiries.</p>
+    
+    <div class="contact-card">
+      <p class="contact-detail">
+        <strong>Email:</strong> 
+        <span class="text-primary-color">{{ site_settings.email_general }}</span>
+      </p>
+      
+      <p class="contact-detail">
+        <strong>Phone:</strong> 
+        <span class="text-primary-color">{{ site_settings.phone_primary }}</span>
+      </p>
+      {% if site_settings.phone_secondary %}
+      <p class="contact-detail">
+        <strong>Secondary Phone:</strong> 
+        <span class="text-primary-color">{{ site_settings.phone_secondary }}</span>
+      </p>
+      {% endif %}
+      
+      <p class="contact-address">
+        <strong>Address:</strong> 
+        <span class="text-muted-color">{{ site_settings.address }}</span>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

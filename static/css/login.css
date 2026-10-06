@@ -1,0 +1,128 @@
+body.login-bg {
+  margin: 0;
+  height: 100vh;
+  background-color: #1a2530; /* Dark blue background from your image */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Inter", sans-serif;
+}
+
+.login-card {
+  background: white;
+  width: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.login-header {
+  background: linear-gradient(135deg, #16222b 0%, #1a2c3d 100%);
+  color: white;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.shield-icon {
+  background: #d4af37;
+  color: #1a2530;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 15px auto;
+  font-size: 24px;
+}
+
+.login-header h2 {
+  margin: 0;
+  color: #d4af37; /* Gold text */
+  font-size: 24px;
+}
+
+.login-header p {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #8c9dae;
+}
+
+.login-body {
+  padding: 30px 40px;
+  text-align: center;
+}
+
+.login-body h3 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: #1a2530;
+}
+
+.input-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper .icon {
+  position: absolute;
+  left: 12px;
+  color: #999;
+}
+
+/* Override the default Django input styles for this page */
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 12px 12px 40px !important;
+  margin: 0 !important;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f9f9f9;
+}
+
+.login-btn {
+  width: 100%;
+  background: #1a2530;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: none;
+}
+
+.login-btn:hover {
+  background: #111a22;
+  transform: none;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 25px;
+  color: #666;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.error-msg {
+  color: red;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}

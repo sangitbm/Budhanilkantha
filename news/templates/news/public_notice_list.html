@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notices - Budhanilkantha School{% endblock %}
+
+{% block content %}
+<section class="events section-padding" style="background: var(--light-bg);">
+  <div class="container">
+    <div class="text-center">
+      <h2 class="section-title">Public Notices</h2>
+      <p class="section-subtitle">Stay updated with the latest news, announcements, and events from the school.</p>
+    </div>
+
+    <div class="events-list">
+      {% for notice in notices %}
+      <div class="event-item" style="background: var(--white); box-shadow: var(--shadow);">
+        <div class="event-date">
+          <div class="day">{{ notice.created_at|date:"d" }}</div>
+          <div class="month">{{ notice.created_at|date:"M" }}</div>
+        </div>
+        <div class="event-info" style="flex-grow: 1;">
+          <h4>{{ notice.title }}</h4>
+          <p style="margin-top: 8px;">{{ notice.description }}</p>
+        </div>
+        {% if notice.file_attachment %}
+        <div>
+          <a href="{{ notice.file_attachment.url }}" target="_blank" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.85rem;">Download</a>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div style="text-align: center; padding: 40px; background: var(--white); border-radius: var(--radius); color: var(--text-muted);">
+        <p>No notices available right now. Check back later!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

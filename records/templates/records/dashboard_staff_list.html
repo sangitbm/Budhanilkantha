@@ -1,0 +1,84 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Manage Staff{% endblock %}
+
+{% block header_actions %}
+  <a href="{% url 'add-staff' %}" class="btn btn-primary">+ Add New Staff Member</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .staff-name-cell {
+    font-weight: 500;
+    color: var(--text-dark);
+  }
+
+  .inactive-badge {
+    font-size: 0.7rem;
+    background: #e74c3c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: 600;
+  }
+
+  .actions-right {
+    text-align: right;
+  }
+
+  .action-btns-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .empty-table-cell {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+</style>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Designation</th>
+                <th>Department</th>
+                <th class="actions-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for staff in staff_members %}
+            <tr>
+                <td class="staff-name-cell">
+                    {{ staff.first_name }} {{ staff.last_name }}
+                    {% if not staff.is_active %}
+                    <span class="inactive-badge">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ staff.get_staff_type_display }}</td>
+                <td>{{ staff.designation }}</td>
+                <td>{{ staff.department }}</td>
+                <td class="actions-right">
+                    <div class="action-btns-right">
+                        <a href="{% url 'edit-staff' staff.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'delete-staff' staff.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="empty-table-cell">
+                    💼 No staff members have been added to the database yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

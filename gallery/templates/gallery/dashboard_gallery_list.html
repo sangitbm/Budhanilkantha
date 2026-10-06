@@ -1,0 +1,51 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Manage Gallery{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'add-photo' %}" class="btn btn-primary">+ Add New Photo</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Thumbnail</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Uploaded</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for photo in photos %}
+            <tr>
+                <td style="width: 100px;">
+                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}" style="width: 80px; height: 60px; object-fit: cover; border-radius: var(--radius-sm);">
+                </td>
+                <td style="font-weight: 500; color: var(--text-dark);">{{ photo.title }}</td>
+                <td>
+                    <span style="display: block; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted);">
+                        {{ photo.description|default:"-" }}
+                    </span>
+                </td>
+                <td>{{ photo.uploaded_at|date:"M d, Y" }}</td>
+                <td style="text-align: right;">
+                    <div class="action-btns" style="justify-content: flex-end;">
+                        <a href="{% url 'edit-photo' photo.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'delete-photo' photo.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    No photos have been uploaded to the gallery yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

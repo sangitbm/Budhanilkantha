@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About - {{ site_settings.school_name }}{% endblock %}
+
+{% block content %}
+<style>
+  .full-size-box {
+    width: 100%; 
+    height: 100%;
+  }
+</style>
+
+<section class="about section-padding">
+  <div class="container">
+    <div class="about-grid">
+      
+      <div class="about-text">
+        <h2 class="section-title">Our History</h2>
+        <p>{{ site_settings.school_name }} is a premier educational institution in Nepal, dedicated to providing quality education and fostering holistic development.</p>
+        <p>Established in {{ site_settings.established_year }} AD, we have been a pillar of educational excellence in the community. {% if site_settings.about_short %}{{ site_settings.about_short }}{% else %}We are dedicated to providing holistic education that prepares students for the challenges of tomorrow.{% endif %}</p>
+        <div class="program-tags">
+          <span class="program-tag">{{ site_settings.established_year }} Established</span>
+          <span class="program-tag">2000+ Students</span>
+          <span class="program-tag">80+ Faculty</span>
+        </div>
+      </div>
+      
+      <div class="about-image">
+        <div class="hero-image-placeholder full-size-box">
+          <span>About Image Goes Here</span>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+{% endblock %}

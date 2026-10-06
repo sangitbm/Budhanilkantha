@@ -1,0 +1,68 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Manage Students{% endblock %}
+
+{% block header_actions %}
+  <a href="{% url 'add-student' %}" class="btn btn-primary">+ Add New Student</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .student-name-cell {
+    font-weight: 500;
+    color: var(--text-dark);
+  }
+
+  .actions-right {
+    text-align: right;
+  }
+
+  .action-btns-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .empty-table-cell {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+</style>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Grade</th>
+                <th>Roll No</th>
+                <th>Contact</th>
+                <th class="actions-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td class="student-name-cell">{{ student.first_name }} {{ student.last_name }}</td>
+                <td>{{ student.grade }}</td>
+                <td>{{ student.roll_number }}</td>
+                <td>{{ student.contact_number }}</td>
+                <td class="actions-right">
+                    <div class="action-btns-right">
+                        <a href="{% url 'edit-student' student.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'delete-student' student.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="empty-table-cell">
+                    🎓 No students have been added to the database yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

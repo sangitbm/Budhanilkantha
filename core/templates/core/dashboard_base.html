@@ -1,0 +1,342 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %} - BSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            background-color: var(--light-bg);
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            font-family: var(--font);
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--primary-dark);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .close-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .sidebar-menu {
+            padding: 24px 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-menu a {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            border-left: 4px solid var(--accent);
+        }
+        
+        .sidebar-footer {
+            padding: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-footer form {
+            width: 100%;
+        }
+        
+        .sidebar-footer button {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: none;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .sidebar-footer button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 40px;
+            transition: margin-left 0.3s ease;
+            width: 100%;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .dashboard-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: var(--white);
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            color: var(--text-dark);
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        /* Table Styles */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        .table th {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Form Styles inside Dashboard */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            transition: var(--transition);
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 75, 140, 0.1);
+        }
+
+        /* Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+            .close-sidebar {
+                display: block;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            .table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                {% if site_settings.logo %}
+                    <img src="{{ site_settings.logo.url }}"
+                         alt="{{ site_settings.school_short_name }} Logo"
+                         style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);">
+                {% else %}
+                    <div class="logo-icon" style="width: 36px; height: 36px; font-size: 1rem;">
+                        {{ site_settings.school_short_name|slice:":1" }}
+                    </div>
+                {% endif %}
+                <div style="font-weight: 700; font-size: 1.1rem; line-height: 1.2;">
+                    {{ site_settings.school_short_name }} Admin
+                    <span style="display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7;">Dashboard</span>
+                </div>
+            </div>
+            <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <a href="{% url 'dashboard' %}"
+               class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+               📊 Overview
+            </a>
+            <a href="{% url 'dashboard-notices' %}"
+               class="{% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+               📢 Manage Notices
+            </a>
+            <a href="{% url 'dashboard-gallery' %}"
+               class="{% if 'gallery' in request.resolver_match.url_name or 'photo' in request.resolver_match.url_name %}active{% endif %}">
+               📸 Manage Gallery
+            </a>
+            <a href="{% url 'dashboard-students' %}"
+               class="{% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+               🎓 Manage Students
+            </a>
+            <a href="{% url 'dashboard-staff' %}"
+               class="{% if 'staff' in request.resolver_match.url_name %}active{% endif %}">
+               💼 Manage Staff
+            </a>
+            <a href="{% url 'dashboard-admissions' %}"
+               class="{% if 'admission' in request.resolver_match.url_name %}active{% endif %}">
+               📋 Manage Admissions
+            </a>
+            <a href="{% url 'dashboard-settings' %}"
+               class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+               ⚙️ Site Settings
+            </a>
+            <a href="{% url 'home' %}" target="_blank">🌐 View Site ↗</a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit">🚪 Logout</button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="dashboard-header">
+            <div class="dashboard-title-wrapper">
+                <!-- Hamburger menu button -->
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+                <h1 class="dashboard-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            </div>
+            {% block header_actions %}{% endblock %}
+        </div>
+        
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Javascript to handle opening and closing the menu -->
+    <script>
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
