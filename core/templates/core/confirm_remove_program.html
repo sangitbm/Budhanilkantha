@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Removal - Budhanilkantha Secondary School{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 80px auto; padding: 32px; background: white; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); text-align: center;">
+    <h1 style="color: var(--primary); margin-bottom: 16px;">Confirm Removal</h1>
+    <p style="margin-bottom: 24px; color: var(--text-color); font-size: 1.1rem;">
+        Are you sure you want to remove the program <strong>"{{ program.title }}"</strong>?
+    </p>
+    
+    <form method="post" style="display: flex; gap: 16px; justify-content: center;">
+        {% csrf_token %}
+        <a href="{% url 'dashboard-settings' %}?tab=programs" class="btn btn-outline" style="min-width: 120px;">Cancel</a>
+        <button type="submit" class="btn btn-primary" style="background: #e74c3c; border-color: #e74c3c; min-width: 120px;">Yes, remove</button>
+    </form>
+</div>
+{% endblock %}

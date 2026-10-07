@@ -28,8 +28,8 @@ class SiteSettingsForm(forms.ModelForm):
             'value_1', 'value_2', 'value_3',
             'stat_students', 'stat_faculty', 'stat_support',
             # Programs Section
-            'program_1_title', 'program_1_desc',
-            'program_2_title', 'program_2_desc',
+            
+            
             # Contact
             'phone_primary', 'phone_secondary',
             'email_general', 'email_admissions',

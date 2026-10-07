@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, CreateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 
 from news.models import Notice
 from gallery.models import Photo
 from records.models import Student, Staff
-from .models import AdmissionInquiry, SiteSettings, HeroImage
+from .models import AdmissionInquiry, SiteSettings, HeroImage, AcademicProgram
 from .forms import AdmissionForm, SiteSettingsForm
 
 class HomePageView(TemplateView):
@@ -59,11 +59,56 @@ def dashboard_index_view(request):
     }
     return render(request, 'core/dashboard_index.html', context)
 
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseForbidden
+
+
+ALLOWED_TABS = ['school', 'about', 'programs', 'contact', 'social', 'admissions', 'advanced']
+ALL_GRADES = ['ECD', 'Nursery', 'LKG', 'UKG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
+FIELD_TO_TAB = {
+    'school_name': 'school', 'school_short_name': 'school', 'marquee_text': 'school', 'tagline': 'school',
+    'established_year': 'school', 'principal_name': 'school', 'principal_photo': 'school', 'principal_message': 'school',
+    'about_short': 'school', 'logo': 'school', 'favicon': 'school',
+    'about_image': 'about', 'about_text': 'about', 'curriculum_text': 'about',
+    'value_1': 'about', 'value_2': 'about', 'value_3': 'about',
+    'stat_students': 'about', 'stat_faculty': 'about', 'stat_support': 'about',
+    'phone_primary': 'contact', 'phone_secondary': 'contact', 'email_general': 'contact', 'email_admissions': 'contact',
+    'address': 'contact', 'google_maps_url': 'contact', 'office_hours': 'contact',
+    'facebook_url': 'social', 'youtube_url': 'social', 'twitter_url': 'social', 'instagram_url': 'social', 'whatsapp_url': 'social',
+    'admissions_open': 'admissions', 'admissions_btn_label': 'admissions', 'admissions_btn_link': 'admissions',
+    'admissions_badge': 'admissions', 'admissions_start': 'admissions', 'admissions_end': 'admissions', 'admissions_message': 'admissions',
+    'meta_description': 'advanced', 'og_title': 'advanced', 'og_image': 'advanced', 'maintenance_mode': 'advanced'
+}
+
+@login_required(login_url='/admin/login/')
+def program_remove_view(request, pk):
+
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Not allowed.")
+    
+    settings_obj = SiteSettings.get_settings()
+    program = get_object_or_404(AcademicProgram, pk=pk, site_settings=settings_obj)
+    
+    if request.method == 'POST':
+        title = program.title
+        program.delete()
+        messages.success(request, f"Program '{title}' removed.")
+        return redirect(reverse('dashboard-settings') + '?tab=programs')
+        
+    return render(request, 'core/confirm_remove_program.html', {'program': program})
+
 @login_required(login_url='/admin/login/')
 def dashboard_settings_view(request):
     settings_obj = SiteSettings.get_settings()
+    active_tab = request.GET.get('tab', 'school')
 
     if request.method == 'POST':
+        active_tab = request.POST.get('settings_tab', request.POST.get('tab', active_tab))
+        if active_tab and active_tab.startswith('tab_'):
+            active_tab = active_tab[4:]
+        if active_tab not in ALLOWED_TABS:
+            active_tab = 'school'
+
         # Handle hero image deletion
         delete_id = request.POST.get('delete_hero_image_id')
         if delete_id:
@@ -73,22 +118,94 @@ def dashboard_settings_view(request):
                 messages.success(request, 'Hero image removed.')
             except HeroImage.DoesNotExist:
                 pass
-            return redirect('dashboard-settings')
+            return redirect(reverse('dashboard-settings') + f'?tab={active_tab}')
+
+        # Handle Academic Program deletion redirect
+        delete_prog_id = request.POST.get('delete_program_id')
+        if delete_prog_id:
+            if not request.user.is_staff:
+                return HttpResponseForbidden("Not allowed.")
+            return redirect('program-remove', pk=delete_prog_id)
 
         form = SiteSettingsForm(request.POST, request.FILES, instance=settings_obj)
         if form.is_valid():
-            form.save()
+            obj = form.save(commit=False)
+            obj.open_grades = request.POST.getlist('open_grades')
+            obj.save()
             
-            # Handle multiple hero images upload
             hero_images = request.FILES.getlist('hero_images')
             for img in hero_images:
                 HeroImage.objects.create(site_settings=settings_obj, image=img)
                 
+            # Handle Academic Programs
+            prog_ids = request.POST.getlist('program_id')
+            prog_titles = request.POST.getlist('program_title')
+            prog_descs = request.POST.getlist('program_desc')
+            
+            for i in range(len(prog_titles)):
+                p_id = prog_ids[i] if i < len(prog_ids) else ''
+                p_title = prog_titles[i].strip()
+                p_desc = prog_descs[i].strip() if i < len(prog_descs) else ''
+                
+                if p_id:
+                    try:
+                        prog = AcademicProgram.objects.get(id=p_id, site_settings=settings_obj)
+                        prog.title = p_title
+                        prog.description = p_desc
+                        prog.order = i
+                        prog.save()
+                    except AcademicProgram.DoesNotExist:
+                        pass
+                elif p_title:
+                    # Create new
+                    AcademicProgram.objects.create(
+                        site_settings=settings_obj,
+                        title=p_title,
+                        description=p_desc,
+                        order=i
+                    )
+                
             messages.success(request, '✅ Settings saved successfully!')
-            return redirect('dashboard-settings')
+            return redirect(reverse('dashboard-settings') + f'?tab={active_tab}')
         else:
             messages.error(request, '❌ Please fix the errors below.')
+            # Find the first error and switch to its tab
+            for field in form.errors:
+                if field in FIELD_TO_TAB:
+                    active_tab = FIELD_TO_TAB[field]
+                    break
+                    
     else:
         form = SiteSettingsForm(instance=settings_obj)
 
-    return render(request, 'core/dashboard_settings.html', {'form': form})
+    # Compute error counts per tab for the UI indicator
+    tab_errors = {tab: 0 for tab in ALLOWED_TABS}
+    if hasattr(form, 'errors') and form.errors:
+        for field in form.errors:
+            if field in FIELD_TO_TAB:
+                tab_errors[FIELD_TO_TAB[field]] += 1
+
+    if active_tab and active_tab.startswith('tab_'):
+        active_tab = active_tab[4:]
+    if active_tab not in ALLOWED_TABS:
+        active_tab = 'school'
+
+    programs = list(settings_obj.academic_programs.all())
+    # Always append one empty program slot for the UI
+    programs.append({'id': '', 'title': '', 'description': ''})
+
+    grouped_grades = [
+        ("Early Childhood", [g for g in ALL_GRADES if g in ['ECD', 'Nursery', 'LKG', 'UKG']]),
+        ("Primary", [g for g in ALL_GRADES if g in ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5']]),
+        ("Lower Secondary", [g for g in ALL_GRADES if g in ['Grade 6', 'Grade 7', 'Grade 8']]),
+        ("Secondary", [g for g in ALL_GRADES if g in ['Grade 9', 'Grade 10']]),
+        ("+2", [g for g in ALL_GRADES if g in ['Grade 11', 'Grade 12']]),
+    ]
+    return render(request, 'core/dashboard_settings.html', {
+        'form': form,
+        'all_grades': ALL_GRADES,
+        'grouped_grades': grouped_grades,
+        'active_tab': active_tab,
+        'tab_errors': tab_errors,
+        'programs': programs,
+    })

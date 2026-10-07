@@ -45,10 +45,7 @@ class SiteSettings(models.Model):
     stat_support = models.CharField(max_length=20, default="20+", help_text="e.g. 20+")
 
     # --- Programs Section ---
-    program_1_title = models.CharField(max_length=100, default="Day Shift (ECD - Grade 10)")
-    program_1_desc = models.TextField(blank=True, default="Strong foundation for future success. We provide a robust curriculum, co-curricular activities, and essential skill development.")
-    program_2_title = models.CharField(max_length=100, default="Morning Shift (Grades 11-12)")
-    program_2_desc = models.TextField(blank=True, default="Preparing students for higher education. Offering +2 programs with expert faculty to prepare students for their careers.")
+    # (Migrated to AcademicProgram model)
 
     # --- Contact Info ---
     phone_primary = models.CharField(max_length=20, default='+977-1-4371637', help_text="Main phone number shown in header and footer")
@@ -105,3 +102,16 @@ class HeroImage(models.Model):
 
     def __str__(self):
         return f"Hero Image {self.id}"
+
+
+class AcademicProgram(models.Model):
+    site_settings = models.ForeignKey(SiteSettings, on_delete=models.CASCADE, related_name='academic_programs')
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title
