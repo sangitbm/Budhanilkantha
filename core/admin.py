@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AdmissionInquiry, SiteSettings
+from .models import Testimonial, AdmissionInquiry, SiteSettings
 
 @admin.register(AdmissionInquiry)
 class AdmissionInquiryAdmin(admin.ModelAdmin):
@@ -14,3 +14,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         # If a settings object already exists, disable the Add button
         return not SiteSettings.objects.exists()
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role', 'is_published', 'order', 'created_at')
+    list_filter = ('is_published',)
+    search_fields = ('name', 'role', 'quote')
+    ordering = ('order', '-created_at')

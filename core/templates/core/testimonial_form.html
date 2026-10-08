@@ -1,0 +1,62 @@
+{% extends 'core/dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Testimonial - Admin Dashboard{% endblock %}
+{% block page_title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Testimonial{% endblock %}
+
+{% block dashboard_content %}
+<div class="card" style="margin-top: 24px;">
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+      <div class="st-alert" style="background:#fee2e2; color:#b91c1c; padding:12px; margin-bottom:16px;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block; font-weight:600; margin-bottom:8px;">Name</label>
+      {{ form.name }}
+      {% if form.name.errors %}<div style="color:red; font-size:0.85rem; margin-top:4px;">{{ form.name.errors }}</div>{% endif %}
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block; font-weight:600; margin-bottom:8px;">Role</label>
+      {{ form.role }}
+      <small style="color:var(--text-muted); display:block; margin-top:4px;">e.g. Student (Grade 10)</small>
+      {% if form.role.errors %}<div style="color:red; font-size:0.85rem; margin-top:4px;">{{ form.role.errors }}</div>{% endif %}
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block; font-weight:600; margin-bottom:8px;">Quote</label>
+      {{ form.quote }}
+      <small style="color:var(--text-muted); display:block; margin-top:4px;">Max 300 characters.</small>
+      {% if form.quote.errors %}<div style="color:red; font-size:0.85rem; margin-top:4px;">{{ form.quote.errors }}</div>{% endif %}
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block; font-weight:600; margin-bottom:8px;">Photo (optional)</label>
+      {{ form.photo }}
+      <small style="color:var(--text-muted); display:block; margin-top:4px;">Max 2 MB.</small>
+      {% if form.photo.errors %}<div style="color:red; font-size:0.85rem; margin-top:4px;">{{ form.photo.errors }}</div>{% endif %}
+    </div>
+
+    <div style="margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+      {{ form.is_published }}
+      <label for="{{ form.is_published.id_for_label }}" style="font-weight:600;">Publish immediately</label>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <label style="display:block; font-weight:600; margin-bottom:8px;">Order (0 is highest)</label>
+      {{ form.order }}
+      {% if form.order.errors %}<div style="color:red; font-size:0.85rem; margin-top:4px;">{{ form.order.errors }}</div>{% endif %}
+    </div>
+
+    <div style="display:flex; gap:16px;">
+      <button type="submit" class="btn btn-primary" style="min-height:44px;">Save Testimonial</button>
+      <a href="{% url 'dashboard-testimonials' %}" class="btn btn-outline" style="min-height:44px; display:inline-flex; align-items:center;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

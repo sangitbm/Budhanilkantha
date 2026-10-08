@@ -1,0 +1,34 @@
+{% load ui %}
+<div class="st-image-field {% if is_circle %}st-circle{% endif %}">
+  <div class="st-img-preview">
+    {% if field.value and field.value.url %}
+      <img src="{{ field.value.url }}" alt="Preview">
+    {% else %}
+      {% if is_circle %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      {% else %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+      {% endif %}
+    {% endif %}
+  </div>
+  <div class="st-img-inputs">
+    {% if field.value and field.value.url %}
+      <div class="st-img-filename" title="{{ field.value|basename }}">{{ field.value|basename }}</div>
+    {% endif %}
+    
+    <div class="st-file-wrapper">
+      <input type="file" name="{{ field.name }}" accept="image/*" class="st-file-input {% if field.value %}has-file{% endif %}" id="id_{{ field.name }}">
+    </div>
+    
+    {% if field.value and field.value.url %}
+      <label class="st-clear-row">
+        <input type="checkbox" name="{{ field.name }}-clear" id="id_{{ field.name }}-clear">
+        <span>Remove current image</span>
+      </label>
+    {% endif %}
+    
+    {% if hint %}
+      <p class="st-img-hint">{{ hint }}</p>
+    {% endif %}
+  </div>
+</div>

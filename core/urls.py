@@ -3,7 +3,9 @@ from .views import (
     HomePageView, AboutView, ContactView, EventsView,
     AdmissionCreateView, DashboardAdmissionListView,
     teachers_view, staff_directory_view,
-    dashboard_index_view, dashboard_settings_view, program_remove_view
+    dashboard_index_view, dashboard_settings_view, program_remove_view,
+    DashboardTestimonialListView, TestimonialCreateView,
+    TestimonialUpdateView, TestimonialDeleteView,
 )
 
 urlpatterns = [
@@ -23,4 +25,8 @@ urlpatterns = [
     path('dashboard/admissions/', DashboardAdmissionListView.as_view(), name='dashboard-admissions'),
     path('dashboard/settings/', dashboard_settings_view, name='dashboard-settings'),
     path('dashboard/settings/programs/<int:pk>/remove/', program_remove_view, name='program-remove'),
+    path('dashboard/testimonials/', DashboardTestimonialListView.as_view(), name='dashboard-testimonials'),
+    path('dashboard/testimonials/add/', TestimonialCreateView.as_view(), name='testimonial-add'),
+    path('dashboard/testimonials/<int:pk>/edit/', TestimonialUpdateView.as_view(), name='testimonial-edit'),
+    path('dashboard/testimonials/<int:pk>/delete/', TestimonialDeleteView.as_view(), name='testimonial-delete'),
 ]

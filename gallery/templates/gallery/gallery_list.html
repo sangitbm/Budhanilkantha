@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gallery - Budhanilkantha School{% endblock %}
+
+{% block content %}
+<section id="gallery" class="gallery section-padding" style="scroll-margin-top: 100px;">
+  <div class="container">
+    <div class="text-center">
+      <div class="gal-breadcrumb">
+        <a href="{% url 'home' %}">Home</a> / <span>Gallery</span>
+      </div>
+      <h1 class="section-title">Photo Gallery</h1>
+      <p class="section-subtitle">A glimpse into the vibrant life, events, and facilities at Budhanilkantha School.</p>
+      
+      {% if paginator.count > 0 %}
+      <p class="gal-count">{{ paginator.count }} photo{{ paginator.count|pluralize }}</p>
+      {% endif %}
+    </div>
+
+    <div class="gal-grid">
+      {% for photo in photos %}
+      <div class="gal-card">
+        <a href="#photo-{{ photo.id }}" class="gal-link">
+          <img src="{{ photo.image.url }}" alt="{{ photo.title|default:'Photo' }}" class="gal-img" loading="lazy" />
+        </a>
+        {% if photo.title or photo.description %}
+        <div class="gal-body">
+          {% if photo.title %}
+          <h4 class="gal-title">{{ photo.title }}</h4>
+          {% endif %}
+          {% if photo.description %}
+          <p class="gal-desc">{{ photo.description }}</p>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- CSS-only Lightbox -->
+      <div id="photo-{{ photo.id }}" class="gal-lightbox">
+        <a href="#gallery" class="gal-close" aria-label="Close" title="Close">&times;</a>
+        
+        {% if photo.prev_id %}
+        <a href="#photo-{{ photo.prev_id }}" class="gal-prev" aria-label="Previous" title="Previous">&#10094;</a>
+        {% endif %}
+        
+        <div class="gal-lightbox-content">
+          <img src="{{ photo.image.url }}" alt="{{ photo.title|default:'Photo' }}" class="gal-lightbox-img" />
+          {% if photo.title %}
+          <div class="gal-lightbox-title">{{ photo.title }}</div>
+          {% endif %}
+        </div>
+
+        {% if photo.next_id %}
+        <a href="#photo-{{ photo.next_id }}" class="gal-next" aria-label="Next" title="Next">&#10095;</a>
+        {% endif %}
+      </div>
+
+      {% empty %}
+      <div class="gal-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="gal-empty-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <h3>No Photos Yet</h3>
+        <p>No photos have been uploaded yet. Please check back soon.</p>
+      </div>
+      {% endfor %}
+    </div>
+    
+    {% if is_paginated %}
+    <div class="gal-pagination-wrapper">
+      {% include 'includes/pagination.html' %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

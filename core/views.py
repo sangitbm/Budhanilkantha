@@ -14,6 +14,11 @@ from .forms import AdmissionForm, SiteSettingsForm
 class HomePageView(TemplateView):
     template_name = 'core/home.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['testimonials'] = Testimonial.objects.filter(is_published=True).order_by('order', '-created_at')[:3]
+        return context
+
 class AboutView(TemplateView):
     template_name = 'core/about.html'
 
@@ -66,7 +71,7 @@ from django.http import HttpResponseForbidden
 ALLOWED_TABS = ['school', 'about', 'programs', 'contact', 'social', 'admissions', 'advanced']
 ALL_GRADES = ['ECD', 'Nursery', 'LKG', 'UKG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
 FIELD_TO_TAB = {
-    'school_name': 'school', 'school_short_name': 'school', 'marquee_text': 'school', 'tagline': 'school',
+    'school_name': 'school', 'school_short_name': 'school', 'marquee_text': 'school', 'ticker_enabled': 'school', 'tagline': 'school',
     'established_year': 'school', 'principal_name': 'school', 'principal_photo': 'school', 'principal_message': 'school',
     'about_short': 'school', 'logo': 'school', 'favicon': 'school',
     'about_image': 'about', 'about_text': 'about', 'curriculum_text': 'about',
@@ -99,6 +104,9 @@ def program_remove_view(request, pk):
 
 @login_required(login_url='/admin/login/')
 def dashboard_settings_view(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Not allowed.")
+        
     settings_obj = SiteSettings.get_settings()
     active_tab = request.GET.get('tab', 'school')
 
@@ -201,6 +209,9 @@ def dashboard_settings_view(request):
         ("Secondary", [g for g in ALL_GRADES if g in ['Grade 9', 'Grade 10']]),
         ("+2", [g for g in ALL_GRADES if g in ['Grade 11', 'Grade 12']]),
     ]
+    
+    active_ticker_count = Notice.objects.filter(show_in_ticker=True).count()
+    
     return render(request, 'core/dashboard_settings.html', {
         'form': form,
         'all_grades': ALL_GRADES,
@@ -208,4 +219,61 @@ def dashboard_settings_view(request):
         'active_tab': active_tab,
         'tab_errors': tab_errors,
         'programs': programs,
+        'active_ticker_count': min(5, active_ticker_count),
     })
+
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import UserPassesTestMixin
+from .models import Testimonial
+from .forms import TestimonialForm
+
+class StaffRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_staff
+
+class DashboardTestimonialListView(StaffRequiredMixin, ListView):
+    model = Testimonial
+    template_name = 'core/dashboard_testimonial_list.html'
+    context_object_name = 'testimonials'
+
+    def post(self, request, *args, **kwargs):
+        # Handle toggle publish
+        if 'toggle_publish' in request.POST:
+            t_id = request.POST.get('testimonial_id')
+            t = get_object_or_404(Testimonial, id=t_id)
+            t.is_published = not t.is_published
+            t.save()
+            status = "published" if t.is_published else "unpublished"
+            messages.success(request, f"Testimonial by {t.name} is now {status}.")
+            return redirect('dashboard-testimonials')
+        return redirect('dashboard-testimonials')
+
+class TestimonialCreateView(StaffRequiredMixin, CreateView):
+    model = Testimonial
+    form_class = TestimonialForm
+    template_name = 'core/testimonial_form.html'
+    success_url = reverse_lazy('dashboard-testimonials')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Testimonial added successfully.")
+        return super().form_valid(form)
+
+class TestimonialUpdateView(StaffRequiredMixin, UpdateView):
+    model = Testimonial
+    form_class = TestimonialForm
+    template_name = 'core/testimonial_form.html'
+    success_url = reverse_lazy('dashboard-testimonials')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Testimonial updated successfully.")
+        return super().form_valid(form)
+
+class TestimonialDeleteView(StaffRequiredMixin, DeleteView):
+    model = Testimonial
+    template_name = 'core/testimonial_confirm_delete.html'
+    success_url = reverse_lazy('dashboard-testimonials')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Testimonial deleted.")
+        return super().delete(request, *args, **kwargs)

@@ -22,6 +22,7 @@ class SiteSettings(models.Model):
     school_name = models.CharField(max_length=200, default='Budhanilkantha Secondary School')
     school_short_name = models.CharField(max_length=20, default='BSS', help_text="Short name shown in navbar, e.g. BSS")
     marquee_text = models.CharField(max_length=500, blank=True, help_text="Scrolling announcement text above the navbar. Leave blank to hide.")
+    ticker_enabled = models.BooleanField(default=True)
     tagline = models.CharField(max_length=255, default='Excellence in Education', help_text="Shown in the hero section and footer")
     established_year = models.CharField(max_length=10, default='1990', help_text="Year the school was established")
     principal_name = models.CharField(max_length=100, blank=True, help_text="Name of the current principal")
@@ -55,6 +56,12 @@ class SiteSettings(models.Model):
     address = models.CharField(max_length=255, default='Narayanthan, Kathmandu, Nepal')
     google_maps_url = models.URLField(blank=True, help_text="Paste your Google Maps embed or share link here")
     office_hours = models.CharField(max_length=100, blank=True, help_text="e.g. Sun-Fri, 9AM - 5PM")
+
+    # --- Information Officer ---
+    info_officer_name = models.CharField(max_length=200, blank=True)
+    info_officer_title = models.CharField(max_length=200, blank=True, default='Information Officer')
+    info_officer_phone = models.CharField(max_length=50, blank=True)
+    info_officer_email = models.EmailField(blank=True)
 
     # --- Social Media ---
     facebook_url = models.URLField(blank=True, help_text="Full Facebook page URL")
@@ -94,6 +101,18 @@ class SiteSettings(models.Model):
         """Always returns the single settings object, creating it if it doesn't exist."""
         obj, created = cls.objects.get_or_create(pk=1)
         return obj
+        
+    @property
+    def is_admission_active(self):
+        from django.utils import timezone
+        if not self.admissions_open:
+            return False
+        today = timezone.now().date()
+        if self.admissions_start and today < self.admissions_start:
+            return False
+        if self.admissions_end and today > self.admissions_end:
+            return False
+        return True
 
 class HeroImage(models.Model):
     site_settings = models.ForeignKey(SiteSettings, on_delete=models.CASCADE, related_name='hero_images')
@@ -115,3 +134,31 @@ class AcademicProgram(models.Model):
 
     def __str__(self):
         return self.title
+
+from django.core.exceptions import ValidationError
+
+def validate_image_size(image):
+    file_size = image.file.size
+    limit_mb = 2
+    if file_size > limit_mb * 1024 * 1024:
+        raise ValidationError(f"Max size of file is {limit_mb} MB")
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100, help_text="e.g. Student (Grade 10)")
+    quote = models.TextField(help_text="Max 300 characters")
+    photo = models.ImageField(upload_to='testimonials/', blank=True, null=True, validators=[validate_image_size])
+    is_published = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def clean(self):
+        super().clean()
+        if self.quote and len(self.quote) > 300:
+            raise ValidationError({'quote': 'Quote cannot exceed 300 characters.'})
+
+    def __str__(self):
+        return f"{self.name} - {self.role}"
