@@ -18,52 +18,74 @@
 </head>
 
 <body>
+  <!-- Ticker / Notice Bar -->
+  {% if site_settings.marquee_text or ticker_notices %}
+  <div class="ticker" role="region" aria-label="Latest notices">
+    <span class="ticker-label">Notice</span>
+    <div class="ticker-viewport">
+      <div class="ticker-track" style="--ticker-duration: {{ ticker_duration }}s">
+        <ul>
+          {% if site_settings.marquee_text %}
+          <li><a href="{% url 'admissions' %}">{{ site_settings.marquee_text|truncatechars:90 }}</a></li>
+          {% endif %}
+          {% for n in ticker_notices %}
+          <li><a href="{% url 'public-notices' %}"><time>{{ n.created_at|date:"M d" }}</time> {{ n.title|truncatechars:90 }}</a></li>
+          {% endfor %}
+        </ul>
+        <ul aria-hidden="true">
+          {% if site_settings.marquee_text %}
+          <li><a href="{% url 'admissions' %}" tabindex="-1">{{ site_settings.marquee_text|truncatechars:90 }}</a></li>
+          {% endif %}
+          {% for n in ticker_notices %}
+          <li><a href="{% url 'public-notices' %}" tabindex="-1"><time>{{ n.created_at|date:"M d" }}</time> {{ n.title|truncatechars:90 }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <a class="ticker-all" href="{% url 'public-notices' %}">View all</a>
+  </div>
+  {% endif %}
+
   <!-- Header / Navigation -->
   <header class="site-header" style="padding: 0">
-    {% if site_settings.marquee_text %}
-    <!-- ANNOUNCEMENT BAR -->
-    <div id="announcement-bar" class="marquee-wrapper" style="background: var(--accent); color: var(--white); padding: 8px 16px; display: flex; align-items: center; justify-content: center; position: relative;">
-      <div style="flex: 1; overflow: hidden;">
-        <marquee behavior="scroll" direction="left" scrollamount="6" style="color: var(--white); font-size: 0.95rem; font-weight: 600; padding-top: 4px;">
-            <a href="{% url 'admissions' %}" style="color: var(--white); text-decoration: none;">
-                {{ site_settings.marquee_text|default:"Hurry up! Admissions are open — limited seats available." }}
-            </a>
-        </marquee>
-      </div>
-      <button onclick="dismissAnnouncement()" style="position: absolute; right: 16px; background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; padding: 4px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <script>
-      function dismissAnnouncement() {
-        document.getElementById('announcement-bar').style.display = 'none';
-        sessionStorage.setItem('announcement_dismissed', 'true');
-      }
-      if (sessionStorage.getItem('announcement_dismissed') === 'true') {
-        document.getElementById('announcement-bar').style.display = 'none';
-      }
-    </script>
-    {% endif %}
-    
+
     <!-- TOP BAR (Contact & Admin) -->
     <div class="top-bar">
       <div class="container">
         <div class="top-bar-left">
           <span style="display: flex; align-items: center; gap: 6px;">
-            <svg viewBox="0 0 24 24" width="14" height="14" stroke="#ec4899" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="#ec4899" stroke-width="2" fill="none"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+              </path>
+            </svg>
             {{ site_settings.phone_primary }}
           </span>
           <span style="display: flex; align-items: center; gap: 6px;">
-            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
             {{ site_settings.email_general }}
           </span>
         </div>
         <div class="top-bar-right">
           {% if site_settings.facebook_url %}
-          <a href="{{ site_settings.facebook_url }}" target="_blank"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg> Facebook</a>
+          <a href="{{ site_settings.facebook_url }}" target="_blank"><svg viewBox="0 0 24 24" width="14" height="14"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+            </svg> Facebook</a>
           {% endif %}
           <!-- The Admin link goes straight to your custom login! -->
-          <a href="{% url 'login' %}"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Admin</a>
+          <a href="{% url 'login' %}"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor"
+              stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg> Admin</a>
         </div>
       </div>
     </div>
@@ -73,10 +95,10 @@
       <!-- Logo -->
       <a href="{% url 'home' %}" class="logo">
         {% if site_settings.logo %}
-          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.school_short_name }} Logo"
-               style="height: 48px; width: 48px; border-radius: 50%; object-fit: cover;">
+        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.school_short_name }} Logo"
+          style="height: 48px; width: 48px; border-radius: 50%; object-fit: cover;">
         {% else %}
-          <div class="logo-icon">{{ site_settings.school_short_name|slice:":1" }}</div>
+        <div class="logo-icon">{{ site_settings.school_short_name|slice:":1" }}</div>
         {% endif %}
         <div class="logo-text">
           {{ site_settings.school_short_name }}
@@ -93,7 +115,9 @@
 
         <!-- Faculty Dropdown -->
         <div class="dropdown">
-          <a style="cursor: pointer">Faculty ▾</a>
+          <a style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">Faculty
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </a>
           <div class="dropdown-menu">
             <a href="{% url 'teachers' %}">Teachers</a>
             <a href="{% url 'staff-directory' %}">Staff Directory</a>
@@ -129,7 +153,8 @@
       <div class="footer-mission">
         <h2>{{ site_settings.tagline }}</h2>
         <p>
-          {% if site_settings.about_short %}{{ site_settings.about_short }}{% else %}Dedicated to providing quality education and fostering holistic development for our students.{% endif %}
+          {% if site_settings.about_short %}{{ site_settings.about_short }}{% else %}Dedicated to providing quality
+          education and fostering holistic development for our students.{% endif %}
         </p>
         <div class="btn-group">
           <a href="{% url 'about' %}" class="btn btn-outline">Learn More</a>
