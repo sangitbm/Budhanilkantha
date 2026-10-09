@@ -2859,7 +2859,7 @@ input, select, textarea, button {
 
 
 
-.st-clear-row {
+.form-field label.st-clear-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2871,7 +2871,7 @@ input, select, textarea, button {
   font-weight: 500;
   color: #B91C1C;
 }
-.st-clear-row input[type="checkbox"] {
+.form-field label.st-clear-row input[type="checkbox"] {
   width: 16px;
   height: 16px;
   margin: 0;
@@ -2879,7 +2879,8 @@ input, select, textarea, button {
   min-height: 0;
   flex: none;
 }
-.st-clear-row span {
+.form-field label.st-clear-row span {
+  color: inherit;
   display: inline;
   margin: 0;
   padding: 0;
