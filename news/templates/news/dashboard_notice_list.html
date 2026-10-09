@@ -44,6 +44,7 @@
 </style>
 
 <div class="card">
+    <div class="table-responsive">
     <table class="table">
         <thead>
             <tr>
@@ -82,12 +83,18 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" class="empty-table-cell">
+                <td colspan="100">
+    <div class="empty-state">
+        <span class="empty-state-icon">📁</span>
+        <p>
                     📢 No notices have been added yet.
-                </td>
+                </p>
+    </div>
+</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 {% endblock %}

@@ -9,10 +9,12 @@
         Are you sure you want to remove the program <strong>"{{ program.title }}"</strong>?
     </p>
     
+    <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
     <form method="post" style="display: flex; gap: 16px; justify-content: center;">
         {% csrf_token %}
-        <a href="{% url 'dashboard-settings' %}?tab=programs" class="btn btn-outline" style="min-width: 120px;">Cancel</a>
-        <button type="submit" class="btn btn-primary" style="background: #e74c3c; border-color: #e74c3c; min-width: 120px;">Yes, remove</button>
+        <a class="btn btn-outline" href="{% url 'dashboard-settings' %}?tab=programs" class="btn btn-outline" style="min-width: 120px;">Cancel</a>
+        <button type="submit" class="btn btn-danger" class="btn btn-primary" style="background: #e74c3c; border-color: #e74c3c; min-width: 120px;">Yes, remove</button>
     </form>
+</div>
 </div>
 {% endblock %}

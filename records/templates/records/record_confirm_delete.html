@@ -3,7 +3,7 @@
 {% block page_title %}Delete {{ record_type }}{% endblock %}
 
 {% block header_actions %}
-  <a href="javascript:history.back()" class="btn btn-outline btn-sm">← Go Back</a>
+  <a class="btn btn-outline" href="javascript:history.back()" class="btn btn-outline btn-sm">← Go Back</a>
 {% endblock %}
 
 {% block content %}
@@ -56,12 +56,14 @@
     ⚠️ This action cannot be undone. All data related to this {{ record_type|lower }} will be permanently removed.
   </div>
 
-  <form method="post">
+  <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
+    <form method="post">
     {% csrf_token %}
     <div class="delete-actions">
-      <button type="submit" class="btn btn-danger">🗑 Yes, Delete {{ record_type }}</button>
-      <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
+      <button type="submit" class="btn btn-danger" class="btn btn-danger">🗑 Yes, Delete {{ record_type }}</button>
+      <a class="btn btn-outline" href="javascript:history.back()" class="btn btn-outline">Cancel</a>
     </div>
   </form>
+</div>
 </div>
 {% endblock %}

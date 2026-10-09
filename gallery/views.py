@@ -29,8 +29,8 @@ class DashboardGalleryListView(StaffRequiredMixin, ListView):
 class PhotoCreateView(StaffRequiredMixin, CreateView):
     model = Photo
     form_class = PhotoForm
-    template_name = 'photo_form.html'
-    success_url = reverse_lazy('gallery')
+    template_name = 'gallery/photo_form.html'
+    success_url = reverse_lazy('dashboard-gallery')
 
 class PhotoUpdateView(StaffRequiredMixin, UpdateView):
     model = Photo
