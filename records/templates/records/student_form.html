@@ -1,0 +1,544 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}
+{% if object %}Edit Student: {{ object.first_name }} {{ object.last_name }}{% else %}New Student Enrollment{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Layout and Containers */
+    .student-form-page {
+        max-width: 1020px;
+        margin: 0 auto 40px auto;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1e293b;
+    }
+
+    .ef-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .ef-header h1 {
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+    }
+
+    .ef-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .ef-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ecfdf5;
+        color: #059669;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        border: 1px solid #a7f3d0;
+    }
+
+    .ef-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1.2fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    .ef-card {
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 10px rgba(0, 0, 0, 0.02);
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .ef-card-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    .ef-icon {
+        width: 42px;
+        height: 42px;
+        background: #eff6ff;
+        color: #2563eb;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .ef-icon.purple {
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+
+    .ef-icon.green {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .ef-card-title h2 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 3px 0;
+        color: #0f172a;
+    }
+
+    .ef-card-title p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.825rem;
+    }
+
+    .ef-form-group {
+        margin-bottom: 20px;
+    }
+
+    .ef-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .ef-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    .ef-label-req {
+        color: #ef4444;
+        font-weight: bold;
+    }
+
+    .ef-label-hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .ef-input {
+        width: 100%;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.925rem;
+        color: #0f172a;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .ef-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    select.ef-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 36px;
+        cursor: pointer;
+    }
+
+    .ef-textarea-compact {
+        min-height: 64px !important;
+        max-height: 90px !important;
+        height: 68px !important;
+        resize: vertical;
+        line-height: 1.4;
+    }
+
+    .ef-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* Photo Upload Area */
+    .photo-upload-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px 16px;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+
+    .photo-preview-wrapper {
+        width: 110px;
+        height: 110px;
+        margin-bottom: 14px;
+    }
+
+    .photo-preview-img {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+    }
+
+    .photo-placeholder {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        border: 3px solid #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .upload-btn-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .upload-btn-trigger:hover {
+        background: #eff6ff;
+        border-color: #3b82f6;
+        color: #1d4ed8;
+    }
+
+    .photo-hint {
+        margin-top: 10px;
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    /* Checklist */
+    .checklist-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+        font-size: 0.825rem;
+        color: #475569;
+        line-height: 1.4;
+    }
+
+    .checklist-icon {
+        color: #10b981;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    /* Actions */
+    .ef-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 16px;
+        margin-top: 32px;
+        padding-bottom: 40px;
+    }
+
+    .ef-btn {
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .ef-btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .ef-btn-cancel:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    .ef-btn-publish {
+        background: #1d4ed8;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
+    }
+
+    .ef-btn-publish:hover {
+        background: #1e40af;
+        box-shadow: 0 6px 16px rgba(29, 78, 216, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .ef-field-error {
+        color: #ef4444;
+        font-size: 0.8rem;
+        margin-top: 5px;
+    }
+
+    @media (max-width: 860px) {
+        .ef-columns {
+            grid-template-columns: 1fr;
+        }
+
+        .ef-row {
+            grid-template-columns: 1fr;
+        }
+
+        .ef-actions {
+            flex-direction: column-reverse;
+            width: 100%;
+        }
+
+        .ef-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="student-form-page">
+    <div class="ef-header">
+        <div>
+            <h1>{% if object %}Edit Student Enrollment{% else %}New Student Enrollment{% endif %}</h1>
+            <p>Register student demographics, guardian contact info, and academic classification.</p>
+        </div>
+        <div class="ef-status-pill">
+            <span>●</span> Official Student Record
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="studentForm">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div style="background: #fef2f2; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="ef-columns">
+            <!-- Left Column: Primary Details -->
+            <div class="ef-col-main">
+                <!-- Card 1: Student Demographics & Identity -->
+                <div class="ef-card">
+                    <div class="ef-card-header">
+                        <div class="ef-icon">🧑‍🎓</div>
+                        <div class="ef-card-title">
+                            <h2>Student Identity &amp; Demographics</h2>
+                            <p>Basic personal information and student gender</p>
+                        </div>
+                    </div>
+
+                    <div class="ef-row" style="margin-bottom: 20px;">
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.first_name.id_for_label }}">First Name <span class="ef-label-req">*</span></label>
+                            </div>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}<div class="ef-field-error">{{ form.first_name.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.last_name.id_for_label }}">Last Name <span class="ef-label-req">*</span></label>
+                            </div>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}<div class="ef-field-error">{{ form.last_name.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Gender Selection Dropdown -->
+                    <div class="ef-form-group">
+                        <div class="ef-label-row">
+                            <label class="ef-label" for="{{ form.gender.id_for_label }}">Gender <span class="ef-label-req">*</span></label>
+                            <span class="ef-label-hint">Dropdown selector</span>
+                        </div>
+                        {{ form.gender }}
+                        {% if form.gender.errors %}<div class="ef-field-error">{{ form.gender.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="ef-row" style="margin-bottom: 20px;">
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.date_of_birth.id_for_label }}">Date of Birth <span class="ef-label-req">*</span></label>
+                            </div>
+                            {{ form.date_of_birth }}
+                            {% if form.date_of_birth.errors %}<div class="ef-field-error">{{ form.date_of_birth.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.roll_number.id_for_label }}">Roll Number <span class="ef-label-req">*</span></label>
+                                <span class="ef-label-hint">Unique ID</span>
+                            </div>
+                            {{ form.roll_number }}
+                            {% if form.roll_number.errors %}<div class="ef-field-error">{{ form.roll_number.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Grade Dropdown -->
+                    <div class="ef-form-group" style="margin-bottom: 0;">
+                        <div class="ef-label-row">
+                            <label class="ef-label" for="{{ form.grade.id_for_label }}">Class / Grade <span class="ef-label-req">*</span></label>
+                            <span class="ef-label-hint">Dropdown selector</span>
+                        </div>
+                        {{ form.grade }}
+                        {% if form.grade.errors %}<div class="ef-field-error">{{ form.grade.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Card 2: Guardian & Contact Information -->
+                <div class="ef-card">
+                    <div class="ef-card-header">
+                        <div class="ef-icon purple">🏡</div>
+                        <div class="ef-card-title">
+                            <h2>Guardian &amp; Contact Details</h2>
+                            <p>Parent contact and permanent address</p>
+                        </div>
+                    </div>
+
+                    <div class="ef-row" style="margin-bottom: 20px;">
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.guardian_name.id_for_label }}">Guardian Name <span class="ef-label-req">*</span></label>
+                            </div>
+                            {{ form.guardian_name }}
+                            {% if form.guardian_name.errors %}<div class="ef-field-error">{{ form.guardian_name.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.contact_number.id_for_label }}">Contact Phone <span class="ef-label-req">*</span></label>
+                            </div>
+                            {{ form.contact_number }}
+                            {% if form.contact_number.errors %}<div class="ef-field-error">{{ form.contact_number.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Compact Address Box -->
+                    <div class="ef-form-group" style="margin-bottom: 0;">
+                        <div class="ef-label-row">
+                            <label class="ef-label" for="{{ form.address.id_for_label }}">Residential Address <span class="ef-label-req">*</span></label>
+                            <span class="ef-label-hint">Compact text area</span>
+                        </div>
+                        {{ form.address }}
+                        {% if form.address.errors %}<div class="ef-field-error">{{ form.address.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Photo Upload & Information -->
+            <div class="ef-col-side">
+                <!-- Card: Student Photograph Upload -->
+                <div class="ef-card">
+                    <div class="ef-card-header">
+                        <div class="ef-icon green">📸</div>
+                        <div class="ef-card-title">
+                            <h2>Student Photograph</h2>
+                            <p>Upload Photo for official ID cards</p>
+                        </div>
+                    </div>
+
+                    <div class="photo-upload-container">
+                        <div class="photo-preview-wrapper">
+                            {% if object.photo %}
+                            <img src="{{ object.photo.url }}" alt="Student Photo" class="photo-preview-img">
+                            {% else %}
+                            <div class="photo-placeholder">👤</div>
+                            {% endif %}
+                        </div>
+
+                        <div style="margin-bottom: 8px;">
+                            <label for="{{ form.photo.id_for_label }}" class="upload-btn-trigger">
+                                📷 Upload Photo
+                            </label>
+                            <div style="margin-top: 8px;">{{ form.photo }}</div>
+                        </div>
+
+                        <p class="photo-hint">Accepted formats: JPG, PNG, WEBP<br>Clear headshot recommended.</p>
+
+                        {% if form.photo.errors %}
+                        <div class="ef-field-error">{{ form.photo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Card: Enrollment Checklist -->
+                <div class="ef-card">
+                    <div class="ef-card-header">
+                        <div class="ef-icon">📋</div>
+                        <div class="ef-card-title">
+                            <h2>Enrollment Checklist</h2>
+                            <p>Registrar verification notes</p>
+                        </div>
+                    </div>
+
+                    <div class="checklist-item">
+                        <span class="checklist-icon">✓</span>
+                        <span>Ensure Roll Number corresponds to the current academic calendar.</span>
+                    </div>
+                    <div class="checklist-item">
+                        <span class="checklist-icon">✓</span>
+                        <span>Confirm Grade/Class selection matches admission letter.</span>
+                    </div>
+                    <div class="checklist-item">
+                        <span class="checklist-icon">✓</span>
+                        <span>Guardian phone must be reachable for emergency broadcasts.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="ef-actions">
+            <a href="{% url 'dashboard-students' %}" class="ef-btn ef-btn-cancel">Cancel</a>
+            <button type="submit" class="ef-btn ef-btn-publish" id="submitEnrollmentBtn">
+                🎓 Complete Enrollment
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

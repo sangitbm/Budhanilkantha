@@ -1,2 +1,335 @@
-{% url 'dashboard-testimonials' as cancel_url %}
-{% include 'includes/dashboard_form_shell.html' with form_title="Testimonial" cancel_url_name="Testimonials" form_subtitle="Add a testimonial from a student, parent, or alumni." cancel_url=cancel_url submit_label="Save" %}
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}
+{% if object %}Edit{% else %}Add{% endif %} Testimonial
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Reset and Layout */
+    .event-form-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #1e293b;
+    }
+
+    .ef-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .ef-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+    }
+
+    .ef-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .ef-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.02);
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .ef-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .ef-icon {
+        width: 44px;
+        height: 44px;
+        background: #eff6ff;
+        color: #3b82f6;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .ef-card-title h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: #0f172a;
+    }
+
+    .ef-card-title p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .ef-form-group {
+        margin-bottom: 24px;
+    }
+
+    .ef-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .ef-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    .ef-label-req {
+        color: #ef4444;
+    }
+
+    .ef-label-hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .ef-input {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        color: #0f172a;
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+
+    .ef-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .ef-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .ef-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .ef-textarea-wrapper {
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid transparent;
+    }
+
+    .ef-textarea-wrapper:focus-within {
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .ef-textarea-wrapper .ef-input {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* Actions */
+    .ef-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 32px;
+        padding-bottom: 40px;
+    }
+
+    .ef-btn {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+
+    .ef-btn:hover {
+        opacity: 0.9;
+    }
+
+    .ef-btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .ef-btn-publish {
+        background: #1d4ed8;
+        color: #ffffff;
+    }
+
+    .ef-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    @media (max-width: 900px) {
+        .ef-columns {
+            grid-template-columns: 1fr;
+        }
+
+        .ef-card {
+            padding: 20px;
+        }
+
+        .ef-header {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ef-row {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .ef-actions {
+            flex-direction: column-reverse;
+            gap: 12px;
+        }
+
+        .ef-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="event-form-page">
+    <div class="ef-header">
+        <div>
+            <h1>{% if object %}Edit{% else %}Add{% endif %} Testimonial</h1>
+            <p>Add a testimonial from a student, parent, or alumni.</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div style="background: #fef2f2; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px;">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="ef-columns">
+            <div class="ef-card">
+                <div class="ef-card-header">
+                    <div class="ef-icon">💬</div>
+                    <div class="ef-card-title">
+                        <h2>Testimonial Information</h2>
+                        <p>Core details and the quote</p>
+                    </div>
+                </div>
+
+                <div class="ef-form-group">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.name.id_for_label }}">Name <span
+                                class="ef-label-req">*</span></label>
+                    </div>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.name.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="ef-form-group">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.role.id_for_label }}">Role <span
+                                class="ef-label-req">*</span></label>
+                    </div>
+                    {{ form.role }}
+                    {% if form.role.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.role.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="ef-form-group">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.quote.id_for_label }}">Quote <span class="ef-label-req">*</span></label>
+                        <span class="ef-label-hint">Max 300 characters</span>
+                    </div>
+                    {{ form.quote }}
+                    {% if form.quote.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.quote.errors.0 }}</div>{% endif %}
+                </div>
+                
+                <div class="ef-form-group" style="margin-bottom: 0;">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.photo.id_for_label }}">Upload Photo</label>
+                    </div>
+                    <div style="padding-top: 8px;">
+                        {{ form.photo }}
+                    </div>
+                    {% if form.photo.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.photo.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="ef-card">
+                <div class="ef-card-header">
+                    <div class="ef-icon">⚙️</div>
+                    <div class="ef-card-title">
+                        <h2>Testimonial Settings</h2>
+                        <p>Display and ordering options</p>
+                    </div>
+                </div>
+
+                <div class="ef-form-group">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.order.id_for_label }}">Display Order <span class="ef-label-req">*</span></label>
+                    </div>
+                    {{ form.order }}
+                    {% if form.order.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.order.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="ef-form-group" style="margin-bottom: 0;">
+                    <div style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                        {{ form.is_published }}
+                        <label class="ef-label" for="{{ form.is_published.id_for_label }}" style="margin: 0; cursor: pointer;">Publish this testimonial?</label>
+                    </div>
+                    {% if form.is_published.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.is_published.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="ef-actions">
+            <a href="{% url 'dashboard-testimonials' %}" class="ef-btn ef-btn-cancel">Cancel</a>
+            <button type="submit" class="ef-btn ef-btn-publish">
+                Save
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

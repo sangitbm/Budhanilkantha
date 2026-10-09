@@ -1,396 +1,97 @@
-/* Shared form styles for public pages and the dashboard */
-
-:is(main, .main-content) form {
-    color: #0f172a;
+/* Two-column dashboard form layout */
+.form-page {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
 }
 
-:is(main, .main-content) form .form-group,
-:is(main, .main-content) form .form-field,
-:is(main, .main-content) form .record-field {
+.form-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 0.95fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.form-main-card,
+.form-sidebar-card {
     min-width: 0;
-    margin-bottom: 18px;
-}
-
-:is(main, .main-content) form label {
-    display: block;
-    margin-bottom: 7px;
-    color: #1e293b;
-    font-size: 0.92rem;
-    font-weight: 600;
-}
-
-:is(main, .main-content) form input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
-:is(main, .main-content) form select,
-:is(main, .main-content) form textarea {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 46px;
-    padding: 11px 13px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    padding: clamp(20px, 3vw, 28px);
     background: #fff;
-    color: #0f172a;
-    font: inherit;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgb(15 23 42 / 5%);
 }
 
-:is(main, .main-content) form textarea {
-    min-height: 120px;
-    resize: vertical;
+.form-panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-:is(main, .main-content) form input[type="file"] {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 10px;
-    border: 1px dashed #94a3b8;
-    border-radius: 8px;
+.form-panel-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 1.15rem;
+}
+
+.form-panel-heading h3 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.05rem;
+}
+
+.form-panel-heading p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 0.86rem;
+}
+
+.form-sidebar-fields {
+    display: grid;
+    gap: 18px;
+}
+
+.form-sidebar-note {
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
     background: #f8fafc;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.form-sidebar-note strong {
+    display: block;
+    margin-bottom: 4px;
     color: #334155;
 }
 
-:is(main, .main-content) form input[type="file"]::file-selector-button {
-    margin-right: 12px;
-    padding: 8px 12px;
-    border: 0;
-    border-radius: 6px;
-    background: #e2e8f0;
-    color: #0f172a;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
+.form-actions {
+    grid-column: 1 / -1;
 }
 
-:is(main, .main-content) form input[type="checkbox"],
-:is(main, .main-content) form input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #1d4ed8;
-    cursor: pointer;
-}
-
-:is(main, .main-content) form input:focus,
-:is(main, .main-content) form select:focus,
-:is(main, .main-content) form textarea:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgb(37 99 235 / 16%);
-}
-
-:is(main, .main-content) form input[type="checkbox"]:focus-visible,
-:is(main, .main-content) form input[type="radio"]:focus-visible {
-    outline: 3px solid rgb(37 99 235 / 25%);
-    outline-offset: 2px;
-}
-
-:is(main, .main-content) form .help-text,
-:is(main, .main-content) form .helptext,
-:is(main, .main-content) form .record-help {
-    display: block;
-    margin-top: 6px;
-    color: #64748b;
-    font-size: 0.83rem;
-    line-height: 1.45;
-}
-
-:is(main, .main-content) form .errorlist,
-:is(main, .main-content) form .error-msg,
-:is(main, .main-content) form .record-field-error {
-    margin: 6px 0 0;
-    color: #b91c1c;
-    font-size: 0.85rem;
-}
-
-:is(main, .main-content) form .errorlist {
-    padding-left: 20px;
-}
-
-:is(main, .main-content) form button[type="submit"],
-:is(main, .main-content) form input[type="submit"] {
-    min-height: 44px;
-    padding: 10px 20px;
-    border: 0;
-    border-radius: 8px;
-    background: #1d4ed8;
-    color: #fff;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.15s ease;
-}
-
-:is(main, .main-content) form button[type="submit"]:hover,
-:is(main, .main-content) form input[type="submit"]:hover {
-    background: #1e40af;
-}
-
-:is(main, .main-content) form button:focus-visible,
-:is(main, .main-content) form a:focus-visible {
-    outline: 3px solid rgb(37 99 235 / 30%);
-    outline-offset: 3px;
-}
-
-:is(main, .main-content) form .record-checkbox {
-    align-items: center;
+@media (max-width: 900px) {
+    .form-columns {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 640px) {
-
-    :is(main, .main-content) form button[type="submit"],
-    :is(main, .main-content) form input[type="submit"] {
-        width: 100%;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-    :is(main, .main-content) form input,
-    :is(main, .main-content) form select,
-    :is(main, .main-content) form textarea,
-    :is(main, .main-content) form button {
-        transition: none;
-    }
-}
-
-/* Form Layout Styles extracted from record_form.html */
-
-    .form-page {
-        width: 100%;
-        max-width: 1040px;
-        margin: 0 auto;
-    }
-
-    .form-breadcrumb {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 9px;
-        margin-bottom: 20px;
-        color: #64748b;
-        font-size: 0.9rem;
-    }
-
-    .form-breadcrumb a {
-        color: #1d4ed8;
-        text-decoration: none;
-    }
-
-    .form-breadcrumb a:hover {
-        text-decoration: underline;
-    }
-
-    .form-heading {
-        margin-bottom: 22px;
-    }
-
-    .form-heading h2 {
-        margin: 0 0 6px;
-        color: #0f172a;
-        font-size: clamp(1.4rem, 3vw, 1.8rem);
-    }
-
-    .form-heading p {
-        margin: 0;
-        color: #64748b;
-    }
-
-    .form-card {
-        padding: clamp(20px, 4vw, 32px);
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        box-shadow: 0 12px 32px rgb(15 23 42 / 7%);
-    }
-
-    .form-section-heading {
-        margin: 0 0 22px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .form-section-heading h3 {
-        margin: 0 0 5px;
-        color: #0f172a;
-        font-size: 1.1rem;
-    }
-
-    .form-section-heading p {
-        margin: 0;
-        color: #64748b;
-        font-size: 0.9rem;
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 20px 24px;
-    }
-
-    .form-field {
-        min-width: 0;
-    }
-
-    .form-field>label {
-        display: block;
-        margin-bottom: 7px;
-        color: #1e293b;
-        font-size: 0.9rem;
-        font-weight: 600;
-    }
-
-    .form-required {
-        color: #b91c1c;
-    }
-
-    .form-field input:not([type="checkbox"]):not([type="radio"]),
-    .form-field select,
-    .form-field textarea {
-        box-sizing: border-box;
-        display: block;
-        width: 100%;
-        min-height: 46px;
-        padding: 10px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #fff;
-        color: #0f172a;
-        font: inherit;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .form-field textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
-
-    .form-field input:focus,
-    .form-field select:focus,
-    .form-field textarea:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgb(37 99 235 / 16%);
-    }
-
-    .form-help {
-        display: block;
-        margin: 6px 0 0;
-        color: #64748b;
-        font-size: 0.82rem;
-        line-height: 1.45;
-    }
-
-    .form-checkbox {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        min-height: 46px;
-        padding: 13px;
-        border: 1px solid #e2e8f0;
-        border-radius: 9px;
-        background: #f8fafc;
-    }
-
-    .form-checkbox input[type="checkbox"] {
-        flex: 0 0 18px;
-        width: 18px;
-        height: 18px;
-        margin: 2px 0 0;
-        accent-color: #1d4ed8;
-    }
-
-    .form-checkbox label {
-        margin: 0;
-        color: #1e293b;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    /* Is active switch */
-    .form-checkbox-active {
-        min-height: 70px;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 14px 16px;
-    }
-
-    .form-checkbox-active>div {
-        flex: 1;
-    }
-
-    .form-checkbox-active .form-help {
-        margin-top: 4px;
-    }
-
-
-
-    .form-error-summary,
-    .form-field-error {
-        color: #b91c1c;
-        font-size: 0.86rem;
-    }
-
-    .form-error-summary {
-        margin: 0 0 20px;
-        padding: 12px 14px;
-        border: 1px solid #fecaca;
-        border-radius: 8px;
-        background: #fef2f2;
-    }
-
-    .form-error-summary ul {
-        margin: 6px 0 0;
-        padding-left: 20px;
-    }
-
-    .form-field-error {
-        margin: 7px 0 0;
-    }
-
     .form-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 28px;
-        padding-top: 22px;
-        border-top: 1px solid #e2e8f0;
+        flex-direction: column-reverse;
     }
 
     .form-actions .btn {
-        min-width: 128px;
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        width: 100%;
     }
-
-    @media (max-width: 640px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-            gap: 17px;
-        }
-
-        .form-actions {
-            flex-direction: column-reverse;
-        }
-
-        .form-actions .btn {
-            width: 100%;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-
-        .form-field input,
-        .form-field select,
-        .form-field textarea,
-        .form-checkbox-active input[type="checkbox"],
-        .form-checkbox-active input[type="checkbox"]::before {
-            transition: none;
-        }
-    }
-
-    .form-field.full {
-        grid-column: 1 / -1;
-    }
+}

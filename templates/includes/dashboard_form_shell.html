@@ -1,5 +1,4 @@
 {% extends 'core/dashboard_base.html' %}
-{% load static %}
 
 {% block page_title %}
 {% if object %}Edit{% else %}Add{% endif %} {{ form_title|default:"Record" }}
@@ -11,56 +10,42 @@
         <a href="{% url 'dashboard' %}">Dashboard</a>
         <span aria-hidden="true">›</span>
         {% if cancel_url %}
-            <a href="{{ cancel_url }}">{{ cancel_url_name|default:"List" }}</a>
-            <span aria-hidden="true">›</span>
+        <a href="{{ cancel_url }}">{{ cancel_url_name|default:"List" }}</a>
+        <span aria-hidden="true">›</span>
         {% endif %}
         <span>{% if object %}Edit{% else %}Add{% endif %} {{ form_title|default:"Record" }}</span>
     </nav>
 
     <header class="form-heading">
-        <h2>{{ form_title }}</h2>
-        <p>
-            {{ form_subtitle|default:"Enter the details below." }} Fields marked
-            <span class="form-required" aria-hidden="true">*</span> are required.
-        </p>
+        <h2>{% if object %}Edit{% else %}Add{% endif %} {{ form_title|default:"Record" }}</h2>
+        <p>{{ form_subtitle|default:"Enter the details below." }}</p>
     </header>
 
-    <section class="form-card" aria-labelledby="form-title">
-        <div class="form-section-heading">
-            <h3 id="form-title">{{ form_title }} details</h3>
-            <p>Make sure the information is accurate before saving.</p>
+    <form method="post" enctype="multipart/form-data" id="genericForm">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="form-error-summary" role="alert">
+            <strong>Please correct the following:</strong>
+            {{ form.non_field_errors }}
         </div>
+        {% endif %}
 
-        <form method="post" enctype="multipart/form-data" id="genericForm">
-            {% csrf_token %}
+        <div class="form-columns">
+            <section class="form-main-card">
+                <div class="form-panel-heading">
+                    <span class="form-panel-icon" aria-hidden="true">✎</span>
+                    <div>
+                        <h3>{{ form_title|default:"Record" }} Information</h3>
+                        <p>Enter the main details below.</p>
+                    </div>
+                </div>
 
-            {% if form.non_field_errors %}
-            <div class="form-error-summary" role="alert">
-                <strong>Please correct the following:</strong>
-                {{ form.non_field_errors }}
-            </div>
-            {% endif %}
-
-            <div class="form-grid">
-                {% for field in form %}
-                <div class="form-field">
-                    {% if field.field.widget.input_type == "checkbox" %}
-                    
-                        {% if field.name == "is_active" or field.name == "show_in_ticker" %}
-                        <div class="form-checkbox form-checkbox-active">
-                            <div>
-                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                {% if field.help_text %}
-                                <small class="form-help">{{ field.help_text }}</small>
-                                {% endif %}
-
-                                {% for error in field.errors %}
-                                <p class="form-field-error" role="alert">{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                            {{ field }}
-                        </div>
-                        {% else %}
+                <div class="form-grid">
+                    {% for field in form %}
+                    {% if field.name != "is_active" and field.name != "show_contact_publicly" and field.name != "date_of_joining" and field.name != "show_in_ticker" and field.name != "file_attachment" and field.name != "start_time" and field.name != "end_time" and field.name != "location" and field.name != "photo" and field.name != "order" and field.name != "is_published" %}
+                    <div class="form-field">
+                        {% if field.field.widget.input_type == "checkbox" %}
                         <div class="form-checkbox">
                             {{ field }}
                             <div>
@@ -68,46 +53,100 @@
                                 {% if field.help_text %}
                                 <small class="form-help">{{ field.help_text }}</small>
                                 {% endif %}
-
-                                {% for error in field.errors %}
-                                <p class="form-field-error" role="alert">{{ error }}</p>
-                                {% endfor %}
                             </div>
                         </div>
-                        {% endif %}
-                    
-                    {% else %}
+                        {% else %}
                         <label for="{{ field.id_for_label }}">
                             {{ field.label }}
                             {% if field.field.required %}
                             <span class="form-required" aria-hidden="true">*</span>
                             {% endif %}
                         </label>
-
                         {{ field }}
-
                         {% if field.help_text %}
                         <small class="form-help">{{ field.help_text }}</small>
+                        {% endif %}
                         {% endif %}
 
                         {% for error in field.errors %}
                         <p class="form-field-error" role="alert">{{ error }}</p>
                         {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <aside class="form-sidebar-card">
+                <div class="form-panel-heading">
+                    <span class="form-panel-icon" aria-hidden="true">▦</span>
+                    <div>
+                        <h3>Record Settings</h3>
+                        <p>Additional options and details.</p>
+                    </div>
+                </div>
+
+                <div class="form-sidebar-fields">
+                    {% for field in form %}
+                    {% if field.name == "is_active" or field.name == "show_contact_publicly" or field.name == "date_of_joining" or field.name == "show_in_ticker" or field.name == "file_attachment" or field.name == "start_time" or field.name == "end_time" or field.name == "location" or field.name == "photo" or field.name == "order" or field.name == "is_published" %}
+                    <div class="form-field">
+                        {% if field.field.widget.input_type == "checkbox" %}
+                        <div class="form-checkbox">
+                            {{ field }}
+                            <div>
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {% if field.help_text %}
+                                <small class="form-help">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                            <span class="form-required" aria-hidden="true">*</span>
+                            {% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <small class="form-help">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                        <p class="form-field-error" role="alert">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if form_title == "Student" %}
+                    <div class="form-sidebar-note">
+                        <strong>Enrollment date</strong>
+                        {% if object %}
+                        {{ object.enrolled_at|date:"F j, Y" }}
+                        {% else %}
+                        Recorded automatically when the student is saved.
+                        {% endif %}
+                    </div>
+                    {% elif form_title == "Photo" %}
+                    <div class="form-sidebar-note">
+                        <strong>Photo tip</strong>
+                        Use a clear image and add a short title or description.
+                    </div>
                     {% endif %}
                 </div>
-                {% endfor %}
-            </div>
+            </aside>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
                     {{ submit_label|default:"Save" }}
                 </button>
-
                 {% if cancel_url %}
                 <a href="{{ cancel_url }}" class="btn btn-outline">Cancel</a>
                 {% endif %}
             </div>
-        </form>
-    </section>
+        </div>
+    </form>
 </div>
 {% endblock %}

@@ -19,9 +19,10 @@
             <h3 style="margin-bottom: 8px;">{{ event.title }}</h3>
             <p class="event-meta">
               🗓️ 
-              {% if event.start_time %}
-                {{ event.start_time|date:"F j, Y, g:i a" }} 
-                {% if event.end_time %} - {{ event.end_time|date:"g:i a" }}{% endif %}
+              {% if event.event_date %}
+                {{ event.event_date|date:"F j, Y" }}{% if event.start_time %} at {{ event.start_time|time:"g:i A" }}{% endif %}{% if event.end_time %} – {{ event.end_time|time:"g:i A" }}{% endif %}
+              {% elif event.start_time %}
+                {{ event.start_time|time:"g:i A" }}{% if event.end_time %} – {{ event.end_time|time:"g:i A" }}{% endif %}
               {% else %}
                 <span class="tba-badge">Date TBA</span>
               {% endif %}
@@ -50,7 +51,7 @@
           <div class="event-card" style="background: #f9fafb; border-left: 4px solid var(--gray);">
             <h4 style="margin-bottom: 8px;">{{ event.title }}</h4>
             <p class="event-meta" style="font-size: 0.9rem;">
-              🗓️ {{ event.start_time|date:"F j, Y" }}
+              🗓️ {% if event.event_date %}{{ event.event_date|date:"F j, Y" }}{% else %}{{ event.created_at|date:"F j, Y" }}{% endif %}
               {% if event.location %} | 📍 {{ event.location }}{% endif %}
             </p>
             <p style="font-size: 0.9rem;">{{ event.description|truncatewords:20 }}</p>

@@ -9,11 +9,12 @@ class NoticeForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['title', 'description', 'start_time', 'end_time', 'location', 'file_attachment']
+        fields = ['title', 'description', 'event_date', 'start_time', 'end_time', 'location', 'file_attachment']
         widgets = {
-            'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'location': forms.TextInput(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'ef-input', 'placeholder': 'e.g., Annual Science Fair & STEM Expo'}),
+            'description': forms.Textarea(attrs={'class': 'ef-input ef-textarea', 'rows': 4, 'placeholder': 'Provide event overview, requirements, agenda highlights, and contact information...'}),
+            'event_date': forms.DateInput(attrs={'type': 'date', 'class': 'ef-input'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'ef-input'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'ef-input'}),
+            'location': forms.TextInput(attrs={'class': 'ef-input', 'placeholder': 'e.g. Main Auditorium / Sports Ground'}),
         }

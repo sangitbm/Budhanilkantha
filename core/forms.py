@@ -113,14 +113,10 @@ class TestimonialForm(forms.ModelForm):
         model = Testimonial
         fields = ['name', 'role', 'quote', 'photo', 'order', 'is_published']
         widgets = {
-            'logo': forms.ClearableFileInput(attrs={'class': 'st-file-input'}),
-            'favicon': forms.ClearableFileInput(attrs={'class': 'st-file-input'}),
-            'principal_photo': forms.ClearableFileInput(attrs={'class': 'st-file-input'}),
-
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'role': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Student (Grade 10)'}),
-            'quote': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'maxlength': '300'}),
-            'order': forms.NumberInput(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'ef-input', 'placeholder': 'e.g. Aarav Sharma'}),
+            'role': forms.TextInput(attrs={'class': 'ef-input', 'placeholder': 'e.g. Student (Grade 10) / Alumnus (Batch 2020)'}),
+            'quote': forms.Textarea(attrs={'class': 'ef-input ef-textarea', 'rows': 4, 'maxlength': '300', 'placeholder': 'Write the testimonial quote here...'}),
+            'order': forms.NumberInput(attrs={'class': 'ef-input'}),
         }
 
 

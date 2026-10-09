@@ -1,2 +1,635 @@
-{% url 'dashboard-gallery' as cancel_url %}
-{% include 'includes/dashboard_form_shell.html' with form_title="Photo" cancel_url_name="Gallery" form_subtitle="Upload a photo for the gallery with an optional title and description." cancel_url=cancel_url submit_label="Save" %}
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}
+{% if object %}Edit Gallery Photo{% else %}Add Gallery Photos{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Center top dashboard header title */
+    .dashboard-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        margin-bottom: 8px;
+        border-bottom: none;
+    }
+
+    .dashboard-title-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    .dashboard-title {
+        text-align: center;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+    }
+
+    .mobile-toggle {
+        position: absolute;
+        left: 0;
+    }
+
+    /* Page Container */
+    .gallery-upload-page {
+        max-width: 960px;
+        margin: 0 auto 40px auto;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1e293b;
+    }
+
+    .ef-centered-subtitle {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.925rem;
+        margin: 0 auto 20px auto;
+        max-width: 660px;
+        line-height: 1.5;
+    }
+
+    /* Breadcrumbs Bar */
+    .ef-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .ef-breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .ef-bc-link {
+        color: #64748b;
+        text-decoration: none;
+    }
+
+    .ef-bc-link:hover {
+        color: #1d4ed8;
+    }
+
+    .ef-bc-sep {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+    }
+
+    .ef-bc-current {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    .ef-term-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+        font-size: 0.775rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 9999px;
+    }
+
+    /* Form Cards */
+    .ef-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
+        padding: 24px 28px;
+        margin-bottom: 22px;
+    }
+
+    .ef-card-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .ef-icon-badge {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .ef-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0 0 3px 0;
+    }
+
+    .ef-card-subtitle {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    /* Native HTML Dropzone */
+    .ef-dropzone-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 38px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .ef-dropzone-label:hover {
+        border-color: #2563eb;
+        background: #f0f7ff;
+    }
+
+    .ef-cloud-icon-circle {
+        width: 50px;
+        height: 50px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        font-size: 1.5rem;
+    }
+
+    .ef-dropzone-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .ef-dropzone-hint {
+        font-size: 0.825rem;
+        color: #64748b;
+        margin-bottom: 16px;
+    }
+
+    .ef-btn-select-device {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #1e293b;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 9px 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        pointer-events: none;
+    }
+
+    .ef-file-input-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+        opacity: 0;
+    }
+
+    /* Staged Card */
+    .staged-section {
+        margin-top: 22px;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 18px;
+    }
+
+    .staged-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .staged-count-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .staged-total-size {
+        font-size: 0.825rem;
+        font-weight: 600;
+        color: #2563eb;
+    }
+
+    .staged-item {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .staged-thumb {
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid #e2e8f0;
+        flex-shrink: 0;
+        background: #f1f5f9;
+    }
+
+    .staged-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .staged-title-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 4px;
+    }
+
+    .staged-filename {
+        font-size: 0.925rem;
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .staged-badge-cover {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #ffedd5;
+        font-size: 0.725rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 9999px;
+    }
+
+    .staged-meta-line {
+        font-size: 0.775rem;
+        color: #64748b;
+        margin-bottom: 3px;
+    }
+
+    .staged-status-line {
+        font-size: 0.775rem;
+        color: #2563eb;
+        font-weight: 500;
+    }
+
+    /* Form Fields */
+    .ef-form-group {
+        margin-bottom: 20px;
+    }
+
+    .ef-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .ef-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    .ef-label-hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .ef-input {
+        width: 100%;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.925rem;
+        color: #0f172a;
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+
+    .ef-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    .ef-textarea-compact {
+        min-height: 64px !important;
+        max-height: 100px !important;
+        height: 72px !important;
+        resize: vertical;
+        line-height: 1.4;
+    }
+
+    .ef-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .feature-toggle-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        cursor: pointer;
+    }
+
+    .feature-toggle-card:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+
+    .feature-toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .feature-toggle-text h4 {
+        margin: 0 0 2px 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .feature-toggle-text p {
+        margin: 0;
+        font-size: 0.775rem;
+        color: #64748b;
+    }
+
+    .ef-checkbox {
+        width: 20px;
+        height: 20px;
+        accent-color: #ea580c;
+        cursor: pointer;
+    }
+
+    /* Bottom Action Buttons */
+    .ef-actions-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        margin-top: 32px;
+        padding-bottom: 24px;
+    }
+
+    .ef-action-pill {
+        padding: 11px 26px;
+        border-radius: 9999px;
+        font-size: 0.925rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .ef-action-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+
+    .ef-action-cancel:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    .ef-action-submit {
+        background: #1d4ed8;
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.3);
+    }
+
+    .ef-action-submit:hover {
+        background: #1e40af;
+        box-shadow: 0 6px 18px rgba(29, 78, 216, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .ef-field-error {
+        color: #ef4444;
+        font-size: 0.8rem;
+        margin-top: 5px;
+    }
+
+    @media (max-width: 768px) {
+        .ef-card {
+            padding: 20px;
+        }
+
+        .ef-row {
+            grid-template-columns: 1fr;
+        }
+
+        .ef-actions-bar {
+            flex-direction: column-reverse;
+            width: 100%;
+        }
+
+        .ef-action-pill {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="gallery-upload-page">
+    <p class="ef-centered-subtitle">
+        Upload college event imagery, student activities, and athletics photos to {{ site_settings.school_name|default:"school" }} media albums.
+    </p>
+
+    <!-- Top Breadcrumbs & Academic Year Badge -->
+    <div class="ef-top-bar">
+        <div class="ef-breadcrumbs">
+            <a href="{% url 'dashboard-gallery' %}" class="ef-bc-link">Gallery</a>
+            <span class="ef-bc-sep">›</span>
+            <span class="ef-bc-current">{% if object %}Edit Photo{% else %}Upload Photos{% endif %}</span>
+        </div>
+        <div class="ef-term-badge">
+            AY {% now "Y" %}–{% now "y" as cur_yr %}{{ cur_yr|add:1 }}
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="photoUploadForm">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div style="background: #fef2f2; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #fecaca;">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <!-- Card 1: Media Assets (HTML Native Dropzone) -->
+        <div class="ef-card">
+            <div class="ef-card-header">
+                <div class="ef-icon-badge">📷</div>
+                <div>
+                    <h2 class="ef-card-title">Media Assets</h2>
+                    <p class="ef-card-subtitle">High-res photos or batches (JPEG, PNG, HEIC up to 25MB each)</p>
+                </div>
+            </div>
+
+            <!-- Native HTML clickable upload zone via label -->
+            <label for="{{ form.image.id_for_label }}" class="ef-dropzone-label">
+                <div class="ef-cloud-icon-circle">
+                    ☁️
+                </div>
+                <div class="ef-dropzone-title">Tap to browse or drop photos</div>
+                <div class="ef-dropzone-hint">Supports high-res RAW, JPG, PNG &amp; HEIC</div>
+                
+                <span class="ef-btn-select-device">
+                    🗂️ Select Device Files
+                </span>
+
+                <input type="file" name="image" id="{{ form.image.id_for_label }}" accept="image/*" class="ef-file-input-hidden" {% if not object %}required{% endif %}>
+            </label>
+
+            {% if form.image.errors %}
+            <div class="ef-field-error" style="margin-top: 10px;">{{ form.image.errors.0 }}</div>
+            {% endif %}
+
+            <!-- Staged Section -->
+            {% if object and object.image %}
+            <div class="staged-section" id="stagedSection">
+                <div class="staged-header-row">
+                    <div class="staged-count-label">Current Photo Asset</div>
+                    <div class="staged-total-size">Active in Gallery</div>
+                </div>
+
+                <div class="staged-item">
+                    <img src="{{ object.image.url }}" alt="{{ object.title }}" class="staged-thumb" id="stagedThumb">
+
+                    <div class="staged-info">
+                        <div class="staged-title-line">
+                            <span class="staged-filename">{{ object.title }}</span>
+                            {% if object.is_featured %}
+                            <span class="staged-badge-cover">★ Cover Candidate</span>
+                            {% endif %}
+                        </div>
+                        <div class="staged-meta-line">Uploaded on {{ object.uploaded_at|date:"M d, Y" }}</div>
+                        <div class="staged-status-line">✓ Ready to publish</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Card 2: Photo Information & Metadata -->
+        <div class="ef-card">
+            <div class="ef-card-header">
+                <div class="ef-icon-badge" style="background: #f0fdf4; color: #16a34a;">📝</div>
+                <div>
+                    <h2 class="ef-card-title">Photo Information &amp; Album Details</h2>
+                    <p class="ef-card-subtitle">Caption, capture date, and album display visibility</p>
+                </div>
+            </div>
+
+            <div class="ef-form-group">
+                <div class="ef-label-row">
+                    <label class="ef-label" for="{{ form.title.id_for_label }}">Photo Title</label>
+                    <span class="ef-label-hint">Optional (auto-named from upload if empty)</span>
+                </div>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="ef-field-error">{{ form.title.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="ef-form-group">
+                <div class="ef-label-row">
+                    <label class="ef-label" for="{{ form.description.id_for_label }}">Description / Caption</label>
+                    <span class="ef-label-hint">Optional</span>
+                </div>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="ef-field-error">{{ form.description.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="ef-row">
+                <div class="ef-form-group" style="margin-bottom: 0;">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.date_taken.id_for_label }}">Date Taken</label>
+                        <span class="ef-label-hint">Event date</span>
+                    </div>
+                    {{ form.date_taken }}
+                    {% if form.date_taken.errors %}<div class="ef-field-error">{{ form.date_taken.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="ef-form-group" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: flex-end;">
+                    <label class="feature-toggle-card" for="{{ form.is_featured.id_for_label }}">
+                        <div class="feature-toggle-left">
+                            <span style="font-size: 1.25rem;">⭐</span>
+                            <div class="feature-toggle-text">
+                                <h4>Cover Candidate</h4>
+                                <p>Feature on homepage hero &amp; top gallery banner</p>
+                            </div>
+                        </div>
+                        {{ form.is_featured }}
+                    </label>
+                    {% if form.is_featured.errors %}<div class="ef-field-error">{{ form.is_featured.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Action Buttons -->
+        <div class="ef-actions-bar">
+            <a href="{% url 'dashboard-gallery' %}" class="ef-action-pill ef-action-cancel">
+                Cancel
+            </a>
+            <button type="submit" class="ef-action-pill ef-action-submit">
+                ☁️ Upload &amp; Post
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

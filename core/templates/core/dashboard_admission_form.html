@@ -14,57 +14,94 @@
 
     <header class="form-heading">
         <h2>Update Admission Status</h2>
-        <p>Review the application details and update the status.</p>
+        <p>Review the application and record its current status.</p>
     </header>
 
-    <section class="form-card" aria-labelledby="form-title">
-        <div class="form-section-heading">
-            <h3 id="form-title">Application Details</h3>
-            <p><strong>Student:</strong> {{ object.student_name }}</p>
-            <p><strong>Parent:</strong> {{ object.parent_name }}</p>
-            <p><strong>Grade:</strong> {{ object.grade_applying_for }}</p>
-            <p><strong>Contact:</strong> {{ object.phone_number }} | {{ object.email }}</p>
-            <p><strong>Submitted:</strong> {{ object.submitted_at|date:"F j, Y" }}</p>
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="form-error-summary" role="alert">
+            <strong>Please correct the following:</strong>
+            {{ form.non_field_errors }}
         </div>
+        {% endif %}
 
-        <form method="POST">
-            {% csrf_token %}
-            
-            {% if form.non_field_errors %}
-            <div class="form-error-summary" role="alert">
-                <strong>Please correct the following:</strong>
-                {{ form.non_field_errors }}
-            </div>
-            {% endif %}
+        <div class="form-columns">
+            <section class="form-main-card">
+                <div class="form-panel-heading">
+                    <span class="form-panel-icon" aria-hidden="true">▤</span>
+                    <div>
+                        <h3>Application Information</h3>
+                        <p>Details submitted by the applicant.</p>
+                    </div>
+                </div>
 
-            <div class="form-grid">
-                {% for field in form %}
-                <div class="form-field">
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                        {% if field.field.required %}
-                        <span class="form-required" aria-hidden="true">*</span>
+                <div class="form-sidebar-note">
+                    <strong>Student</strong>
+                    {{ object.student_name }}
+                </div>
+
+                <div class="form-sidebar-note">
+                    <strong>Parent / Guardian</strong>
+                    {{ object.parent_name }}
+                </div>
+
+                <div class="form-sidebar-note">
+                    <strong>Grade applying for</strong>
+                    {{ object.grade_applying_for }}
+                </div>
+
+                <div class="form-sidebar-note">
+                    <strong>Contact</strong>
+                    {{ object.phone_number }}<br>
+                    {{ object.email }}
+                </div>
+
+                <div class="form-sidebar-note">
+                    <strong>Submitted</strong>
+                    {{ object.submitted_at|date:"F j, Y" }}
+                </div>
+            </section>
+
+            <aside class="form-sidebar-card">
+                <div class="form-panel-heading">
+                    <span class="form-panel-icon" aria-hidden="true">✓</span>
+                    <div>
+                        <h3>Review</h3>
+                        <p>Set the status and add staff-only notes.</p>
+                    </div>
+                </div>
+
+                <div class="form-sidebar-fields">
+                    {% for field in form %}
+                    <div class="form-field">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                            <span class="form-required" aria-hidden="true">*</span>
+                            {% endif %}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                        <small class="form-help">{{ field.help_text }}</small>
                         {% endif %}
-                    </label>
 
-                    {{ field }}
-
-                    {% if field.help_text %}
-                    <small class="form-help">{{ field.help_text }}</small>
-                    {% endif %}
-
-                    {% for error in field.errors %}
-                    <p class="form-field-error" role="alert">{{ error }}</p>
+                        {% for error in field.errors %}
+                        <p class="form-field-error" role="alert">{{ error }}</p>
+                        {% endfor %}
+                    </div>
                     {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
+            </aside>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Save Changes</button>
                 <a href="{% url 'dashboard-admissions' %}" class="btn btn-outline">Cancel</a>
             </div>
-        </form>
-    </section>
+        </div>
+    </form>
 </div>
 {% endblock %}

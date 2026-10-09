@@ -14,7 +14,7 @@ class StudentListView(StaffRequiredMixin, ListView):
 class StudentCreateView(StaffRequiredMixin, CreateView):
     model = Student
     form_class = StudentForm
-    template_name = 'records/record_form.html'
+    template_name = 'records/student_form.html'
     success_url = reverse_lazy('dashboard-students')
     
     def get_context_data(self, **kwargs):
@@ -25,7 +25,7 @@ class StudentCreateView(StaffRequiredMixin, CreateView):
 class StudentUpdateView(StaffRequiredMixin, UpdateView):
     model = Student
     form_class = StudentForm
-    template_name = 'records/record_form.html'
+    template_name = 'records/student_form.html'
     success_url = reverse_lazy('dashboard-students')
     
     def get_context_data(self, **kwargs):

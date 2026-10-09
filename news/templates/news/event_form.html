@@ -1,2 +1,381 @@
-{% url 'dashboard-events' as cancel_url %}
-{% include 'includes/dashboard_form_shell.html' with form_title="Event" cancel_url_name="Events" form_subtitle="Enter the event details below. Use the start and end time to display it on the calendar." cancel_url=cancel_url submit_label="Save" %}
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}
+{% if object %}Edit{% else %}Create{% endif %} School Event
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Reset and Layout */
+    .event-form-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #1e293b;
+    }
+
+    .ef-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .ef-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+    }
+
+    .ef-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .ef-draft-badge {
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 9999px;
+    }
+
+    .ef-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.02);
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .ef-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .ef-icon {
+        width: 44px;
+        height: 44px;
+        background: #eff6ff;
+        color: #3b82f6;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .ef-card-title h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: #0f172a;
+    }
+
+    .ef-card-title p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .ef-form-group {
+        margin-bottom: 24px;
+    }
+
+    .ef-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .ef-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    .ef-label-req {
+        color: #ef4444;
+    }
+
+    .ef-label-hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .ef-input {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        color: #0f172a;
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+
+    .ef-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .ef-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .ef-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    /* Toolbar for description (dummy visual) */
+    .ef-toolbar {
+        display: flex;
+        gap: 16px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        border-radius: 8px 8px 0 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .ef-toolbar-icon {
+        cursor: pointer;
+        font-weight: 600;
+        font-family: serif;
+    }
+
+    .ef-toolbar-icon.italic {
+        font-style: italic;
+    }
+
+    .ef-textarea-wrapper {
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid transparent;
+    }
+
+    .ef-textarea-wrapper:focus-within {
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .ef-textarea-wrapper .ef-input {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* Actions */
+    .ef-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 32px;
+        padding-bottom: 40px;
+    }
+
+    .ef-btn {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+
+    .ef-btn:hover {
+        opacity: 0.9;
+    }
+
+    .ef-btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .ef-btn-draft {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .ef-btn-publish {
+        background: #1d4ed8;
+        color: #ffffff;
+    }
+
+    @media (max-width: 768px) {
+        .ef-card {
+            padding: 20px;
+        }
+
+        .ef-header {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ef-row {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .ef-actions {
+            flex-direction: column-reverse;
+            gap: 12px;
+        }
+
+        .ef-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="event-form-page">
+    <div class="ef-header">
+        <div>
+            <h1>{% if object %}Edit{% else %}Create{% endif %} School Event</h1>
+            <p>Coordinate schedules across {{ site_settings.school_name|default:"the campus" }} and notify attendees
+                instantly.</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div style="background: #fef2f2; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px;">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="ef-card">
+            <div class="ef-card-header">
+                <div class="ef-icon">📅</div>
+                <div class="ef-card-title">
+                    <h2>Event Information</h2>
+                    <p>Core details for calendar feeds</p>
+                </div>
+            </div>
+
+            <div class="ef-form-group">
+                <div class="ef-label-row">
+                    <label class="ef-label" for="{{ form.title.id_for_label }}">Title <span
+                            class="ef-label-req">*</span></label>
+                    <span class="ef-label-hint">0/75</span>
+                </div>
+                {{ form.title }}
+                {% if form.title.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                    form.title.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="ef-form-group">
+                <div class="ef-label-row">
+                    <label class="ef-label" for="{{ form.description.id_for_label }}">Description <span
+                            class="ef-label-req">*</span></label>
+                </div>
+                <div class="ef-textarea-wrapper">
+                    <div class="ef-toolbar">
+                        <span class="ef-toolbar-icon">B</span>
+                        <span class="ef-toolbar-icon italic">I</span>
+                        <span class="ef-toolbar-icon">≡</span>
+                        <span class="ef-toolbar-icon">🔗</span>
+                    </div>
+                    {{ form.description }}
+                </div>
+                {% if form.description.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                    form.description.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="ef-form-group" style="margin-bottom: 0;">
+                <div class="ef-label-row">
+                    <label class="ef-label" for="{{ form.file_attachment.id_for_label }}">File Attachment</label>
+                </div>
+                <div style="padding-top: 8px;">
+                    {{ form.file_attachment }}
+                </div>
+                {% if form.file_attachment.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                    form.file_attachment.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="ef-card">
+            <div class="ef-card-header">
+                <div class="ef-icon">🕒</div>
+                <div class="ef-card-title">
+                    <h2>Schedule & Location</h2>
+                    <p>Date limits, timetable & venue access</p>
+                </div>
+            </div>
+
+            <div class="ef-row" style="margin-bottom: 24px;">
+                <div class="ef-form-group" style="margin-bottom: 0; grid-column: 1 / -1;">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.event_date.id_for_label }}">Event Date <span
+                                class="ef-label-req">*</span></label>
+                    </div>
+                    {{ form.event_date }}
+                    {% if form.event_date.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.event_date.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="ef-row" style="margin-bottom: 24px;">
+                <div class="ef-form-group" style="margin-bottom: 0;">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.start_time.id_for_label }}">Start Time <span
+                                class="ef-label-req">*</span></label>
+                    </div>
+                    {{ form.start_time }}
+                    {% if form.start_time.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.start_time.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="ef-form-group" style="margin-bottom: 0;">
+                    <div class="ef-label-row">
+                        <label class="ef-label" for="{{ form.end_time.id_for_label }}">End Time</label>
+                    </div>
+                    {{ form.end_time }}
+                    {% if form.end_time.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                        form.end_time.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="ef-form-group" style="margin-bottom: 0;">
+                <div class="ef-label-row">
+                    <label class="ef-label" for="{{ form.location.id_for_label }}">Location / Venue</label>
+                </div>
+                {{ form.location }}
+                {% if form.location.errors %}<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">{{
+                    form.location.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="ef-actions">
+            <a href="{% url 'dashboard-events' %}" class="ef-btn ef-btn-cancel">Cancel</a>
+            <button type="submit" class="ef-btn ef-btn-publish">
+                Publish
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

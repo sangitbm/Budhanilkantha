@@ -1,9 +1,39 @@
 from django.db import models
 
 class Student(models.Model):
+    GENDER_CHOICES = (
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Other', 'Other'),
+    )
+
+    GRADE_CHOICES = (
+        ('Class 1', 'Class 1'),
+        ('Class 2', 'Class 2'),
+        ('Class 3', 'Class 3'),
+        ('Class 4', 'Class 4'),
+        ('Class 5', 'Class 5'),
+        ('Class 6', 'Class 6'),
+        ('Class 7', 'Class 7'),
+        ('Class 8', 'Class 8'),
+        ('Class 9', 'Class 9'),
+        ('Class 10', 'Class 10 (SEE)'),
+        ('Class 11 Science', 'Class 11 - Science'),
+        ('Class 11 Management', 'Class 11 - Management'),
+        ('Class 11 Humanities', 'Class 11 - Humanities'),
+        ('Class 12 Science', 'Class 12 - Science'),
+        ('Class 12 Management', 'Class 12 - Management'),
+        ('Class 12 Humanities', 'Class 12 - Humanities'),
+        ('A-Level (AS)', 'Cambridge A-Level (AS)'),
+        ('A-Level (A2)', 'Cambridge A-Level (A2)'),
+        ('Grade 1', 'Grade 1'),
+    )
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    grade = models.CharField(max_length=50, help_text="e.g. Class 10, Class 12 Science")
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='Male')
+    photo = models.ImageField(upload_to='students/', blank=True, null=True)
+    grade = models.CharField(max_length=50, choices=GRADE_CHOICES, help_text="Select student grade/class")
     roll_number = models.CharField(max_length=20, unique=True)
     date_of_birth = models.DateField()
     guardian_name = models.CharField(max_length=200)

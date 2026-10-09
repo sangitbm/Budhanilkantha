@@ -1,4 +1,5 @@
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render, redirect
 from core.permissions import StaffRequiredMixin, staff_required
@@ -49,12 +50,14 @@ class EventsView(ListView):
     def get_queryset(self):
         from django.utils import timezone
         from django.db.models import Q
-        return Event.objects.filter(Q(start_time__gte=timezone.now()) | Q(start_time__isnull=True)).order_by('start_time')
+        today = timezone.now().date()
+        return Event.objects.filter(Q(event_date__gte=today) | Q(event_date__isnull=True)).order_by('event_date', 'start_time')
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from django.utils import timezone
-        context['past_events'] = Event.objects.filter(start_time__lt=timezone.now()).order_by('-start_time')
+        today = timezone.now().date()
+        context['past_events'] = Event.objects.filter(event_date__lt=today).order_by('-event_date', '-start_time')
         return context
 
 
@@ -118,9 +121,9 @@ def staff_directory_view(request):
 
 @staff_required
 def dashboard_index_view(request):
-    from django.utils import timezone
+    today = timezone.now().date()
     recent_admissions = AdmissionInquiry.objects.all().order_by('-submitted_at')[:5]
-    upcoming_events = Event.objects.filter(start_time__gte=timezone.now()).order_by('start_time')[:5]
+    upcoming_events = Event.objects.filter(Q(event_date__gte=today) | Q(event_date__isnull=True)).order_by('event_date', 'start_time')[:5]
     recent_notices = Notice.objects.all().order_by('-created_at')[:5]
 
     context = {
