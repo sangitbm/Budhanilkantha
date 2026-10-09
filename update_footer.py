@@ -1,0 +1,137 @@
+import re
+
+with open('templates/base.html', 'r', encoding='utf-8') as f:
+    text = f.read()
+
+search_footer = r'<div class="ftr-main">.*?</footer>'
+replace_footer = '''<div class="ftr-main">
+      <div class="container">
+        <div class="ftr-grid">
+          <!-- Brand -->
+          <div class="ftr-col ftr-brand">
+            <a href="{% url 'home' %}" class="ftr-logo">
+              {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.school_short_name }} Logo" class="ftr-logo-img">
+              {% else %}
+                <div class="ftr-logo-icon">{{ site_settings.school_short_name|slice:":1" }}</div>
+              {% endif %}
+              <div class="ftr-logo-text">
+                {{ site_settings.school_name }}
+                <span class="ftr-logo-sub">{{ site_settings.school_short_name }}</span>
+              </div>
+            </a>
+            <p class="ftr-about-text">
+              {% if site_settings.about_short %}{{ site_settings.about_short }}{% else %}Dedicated to providing quality education and fostering holistic development for our students.{% endif %}
+            </p>
+            <div class="ftr-social">
+              {% if site_settings.facebook_url %}
+              <a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              </a>
+              {% endif %}
+              {% if site_settings.youtube_url %}
+              <a href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+              </a>
+              {% endif %}
+              {% if site_settings.instagram_url %}
+              <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              </a>
+              {% endif %}
+              {% if site_settings.twitter_url %}
+              <a href="{{ site_settings.twitter_url }}" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+              </a>
+              {% endif %}
+              {% if site_settings.whatsapp_url %}
+              <a href="{{ site_settings.whatsapp_url }}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="ftr-col ftr-quick-links">
+            <h3 class="ftr-heading">Quick Links</h3>
+            <ul class="ftr-links">
+              <li><a href="{% url 'about' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> About Us</a></li>
+              <li><a href="{% url 'public-notices' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Official Notices</a></li>
+              <li><a href="{% url 'teachers' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Our Teachers</a></li>
+              <li><a href="{% url 'gallery' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Photo Gallery</a></li>
+              <li><a href="{% url 'events' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Events</a></li>
+              {% if site_settings.admissions_open %}
+              <li><a href="{% url 'admissions' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Admissions</a></li>
+              {% endif %}
+              <li><a href="{% url 'contact' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Contact Us</a></li>
+            </ul>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="ftr-col ftr-contact-info">
+            <h3 class="ftr-heading">Contact Info</h3>
+            <ul class="ftr-contact-list">
+              <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>{{ site_settings.address }}</span>
+              </li>
+              <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <a href="tel:{{ site_settings.phone_primary|cut:' ' }}">{{ site_settings.phone_primary }}</a>
+              </li>
+              <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                <a href="mailto:{{ site_settings.email_general }}">{{ site_settings.email_general }}</a>
+              </li>
+              {% if site_settings.office_hours %}
+              <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>{{ site_settings.office_hours }}</span>
+              </li>
+              {% endif %}
+            </ul>
+            
+            {% if site_settings.info_officer_name or site_settings.info_officer_phone or site_settings.info_officer_email %}
+            <div class="ftr-info-officer">
+              <div class="ftr-io-title">{{ site_settings.info_officer_title|default:"Information Officer" }}</div>
+              {% if site_settings.info_officer_name %}
+              <div class="ftr-io-name">{{ site_settings.info_officer_name }}</div>
+              {% endif %}
+              <div class="ftr-io-links">
+                {% if site_settings.info_officer_phone %}
+                <a href="tel:{{ site_settings.info_officer_phone|cut:' ' }}" class="ftr-io-contact">
+                  <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> {{ site_settings.info_officer_phone }}
+                </a>
+                {% endif %}
+                {% if site_settings.info_officer_email %}
+                <a href="mailto:{{ site_settings.info_officer_email }}" class="ftr-io-contact">
+                  <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> {{ site_settings.info_officer_email }}
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="ftr-bottom">
+      <div class="container ftr-bottom-flex">
+        <p>&copy; {% now "Y" %} {{ site_settings.school_name }}. All rights reserved.</p>
+        <div class="ftr-bottom-right">
+          <span>{{ site_settings.address }}</span>
+          <a href="{% url 'login' %}" class="ftr-admin-link">Admin Portal</a>
+        </div>
+      </div>
+    </div>
+  </footer>'''
+
+if re.search(search_footer, text, re.DOTALL):
+    text = re.sub(search_footer, replace_footer, text, flags=re.DOTALL)
+    with open('templates/base.html', 'w', encoding='utf-8') as f:
+        f.write(text)
+    print('Updated footer in base.html')
+else:
+    print('Could not find footer in base.html')
