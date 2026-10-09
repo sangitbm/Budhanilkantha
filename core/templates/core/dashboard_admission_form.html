@@ -1,0 +1,36 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Update Admission Status{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px;">
+    <h3 style="margin-bottom: 24px;">Application Details</h3>
+    
+    <div style="background: var(--light-bg); padding: 16px; border-radius: var(--radius); margin-bottom: 24px;">
+      <p><strong>Student:</strong> {{ object.student_name }}</p>
+      <p><strong>Parent:</strong> {{ object.parent_name }}</p>
+      <p><strong>Grade:</strong> {{ object.grade_applying_for }}</p>
+      <p><strong>Contact:</strong> {{ object.phone_number }} | {{ object.email }}</p>
+      <p><strong>Submitted:</strong> {{ object.submitted_at|date:"F j, Y" }}</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Update Status</label>
+            {{ form.status }}
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Internal Follow-up Note (Private)</label>
+            {{ form.internal_note }}
+            <small style="color: var(--text-muted); display: block; margin-top: 4px;">This note is only visible to staff.</small>
+        </div>
+        
+        <div class="action-btns" style="margin-top: 32px;">
+            <a href="{% url 'dashboard-admissions' %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -97,6 +97,16 @@
         </div>
       </a>
 
+      <!-- Mobile Nav Checkbox -->
+      <input type="checkbox" id="mobile-nav-toggle" class="nav-toggle-checkbox">
+      <div class="nav-actions">
+        <label for="mobile-nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation" tabindex="0">
+          <span></span>
+          <span></span>
+          <span></span>
+        </label>
+      </div>
+
       <!-- Nav Links -->
       <nav class="nav-links" id="navLinks">
         <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
@@ -105,9 +115,10 @@
 
         <!-- Faculty Dropdown -->
         <div class="dropdown">
-          <a class="hdr-faculty {% if request.resolver_match.url_name == 'teachers' or request.resolver_match.url_name == 'staff-directory' %}active{% endif %}">Faculty
+          <input type="checkbox" id="faculty-dropdown-toggle" class="dropdown-checkbox" style="display: none;">
+          <label for="faculty-dropdown-toggle" class="hdr-faculty {% if request.resolver_match.url_name == 'teachers' or request.resolver_match.url_name == 'staff-directory' %}active{% endif %}" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" tabindex="0">Faculty
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </a>
+          </label>
           <div class="dropdown-menu">
             <a href="{% url 'teachers' %}" class="{% if request.resolver_match.url_name == 'teachers' %}active{% endif %}">Teachers</a>
             <a href="{% url 'staff-directory' %}" class="{% if request.resolver_match.url_name == 'staff-directory' %}active{% endif %}">Staff Directory</a>
@@ -117,25 +128,28 @@
         <a href="{% url 'gallery' %}" class="{% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">Gallery</a>
         <a href="{% url 'events' %}" class="{% if request.resolver_match.url_name == 'events' %}active{% endif %}">Events</a>
         <a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
-        {% if site_settings.admissions_open %}
+        {% if site_settings.is_admission_active %}
         <a href="{% url 'admissions' %}" class="btn btn-accent nav-apply-btn {% if request.resolver_match.url_name == 'admissions' %}active{% endif %}">Apply Now</a>
         {% endif %}
       </nav>
 
-      <div class="nav-actions">
-        <button class="nav-toggle" onclick="
-              document.getElementById('navLinks').classList.toggle('open')
-            ">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
+
     </div>
   </header>
 
   <!-- Main Content Area -->
-  <main id="main-content" tabindex="-1">{% block content %} {% endblock %}</main>
+  <main id="main-content" tabindex="-1">
+    {% if messages %}
+    <div class="container" style="margin-top: 20px;">
+      {% for message in messages %}
+      <div class="adm-message-success" style="margin-bottom: 10px;">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% block content %} {% endblock %}
+  </main>
 
   <!-- Footer -->
   <footer class="ftr-site-footer">
@@ -216,7 +230,7 @@
               <li><a href="{% url 'teachers' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Our Teachers</a></li>
               <li><a href="{% url 'gallery' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Photo Gallery</a></li>
               <li><a href="{% url 'events' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Events</a></li>
-              {% if site_settings.admissions_open %}
+              {% if site_settings.is_admission_active %}
               <li><a href="{% url 'admissions' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Admissions</a></li>
               {% endif %}
               <li><a href="{% url 'contact' %}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg> Contact Us</a></li>

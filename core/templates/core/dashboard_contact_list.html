@@ -1,0 +1,56 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Contact Messages{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Sender</th>
+                <th>Contact</th>
+                <th>Subject & Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in messages %}
+            <tr>
+                <td style="white-space: nowrap;">{{ msg.submitted_at|date:"M d, Y" }}<br><small class="text-muted">{{ msg.submitted_at|date:"g:i A" }}</small></td>
+                <td style="font-weight: 600;">{{ msg.name }}</td>
+                <td><a href="mailto:{{ msg.email }}">{{ msg.email }}</a></td>
+                <td>
+                  <strong>{{ msg.subject }}</strong>
+                  <p style="margin-top: 4px; font-size: 0.9rem; color: var(--text-muted); max-width: 500px;">{{ msg.message|linebreaksbr }}</p>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="100">
+                    <div class="empty-state">
+                        <span class="empty-state-icon">📬</span>
+                        <p>No contact messages have been received yet.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+  
+  {% if is_paginated %}
+  <div style="margin-top: 24px; text-align: center;">
+      {% if page_obj.has_previous %}
+          <a href="?page=1" class="btn btn-outline btn-sm">&laquo; First</a>
+          <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline btn-sm">Previous</a>
+      {% endif %}
+      <span style="margin: 0 16px; color: var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline btn-sm">Next</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline btn-sm">Last &raquo;</a>
+      {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

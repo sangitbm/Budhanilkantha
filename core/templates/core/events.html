@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Upcoming Events - Budhanilkantha School{% endblock %}
+{% block title %}Events - {{ site_settings.school_name }}{% endblock %}
 
 {% block content %}
 <style>
@@ -16,19 +16,83 @@
     font-size: 3rem;
     margin-bottom: 20px;
   }
+  
+  .event-card {
+    padding: 24px;
+    border-left: 4px solid var(--primary);
+    background: white;
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-sm);
+  }
+  
+  .event-meta {
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  
+  .tba-badge {
+    background: #ffecb3; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    color: #f57f17; 
+    font-size: 0.85rem;
+  }
 </style>
 
 <section class="events section-padding">
   <div class="container text-center">
-    <h1 class="section-title">Upcoming Events</h1>
-    <p class="section-subtitle">Check out the upcoming school activities, holidays, and celebrations.</p>
+    <h1 class="section-title">Events</h1>
+    <p class="section-subtitle">Check out upcoming school activities, holidays, and celebrations.</p>
     
-    <div class="calendar-placeholder">
-      <div class="placeholder-icon">🗓️</div>
-      <h3>Calendar Coming Soon</h3>
-      <p>We are finalizing the academic calendar for the year. Please check back later!</p>
+    <div style="text-align: left; max-width: 800px; margin: 0 auto; margin-top: 40px;">
+      {% if events %}
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+        {% for event in events %}
+          <div class="event-card">
+            <h3 style="margin-bottom: 8px;">{{ event.title }}</h3>
+            <p class="event-meta">
+              🗓️ 
+              {% if event.start_time %}
+                {{ event.start_time|date:"F j, Y, g:i a" }} 
+                {% if event.end_time %} - {{ event.end_time|date:"g:i a" }}{% endif %}
+              {% else %}
+                <span class="tba-badge">Date TBA</span>
+              {% endif %}
+              
+              {% if event.location %} | 📍 {{ event.location }}{% endif %}
+            </p>
+            <p>{{ event.description|linebreaksbr }}</p>
+            {% if event.file_attachment %}
+              <a href="{{ event.file_attachment.url }}" class="btn btn-outline" style="margin-top: 16px; display: inline-block;">📎 Download Attachment</a>
+            {% endif %}
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}
+        <div class="calendar-placeholder" style="text-align: center;">
+          <div class="placeholder-icon">🗓️</div>
+          <h3>No Upcoming Events</h3>
+          <p>There are no scheduled events at the moment. Please check back later!</p>
+        </div>
+      {% endif %}
+      
+      {% if past_events %}
+        <h2 class="section-title" style="margin-top: 60px; font-size: 1.8rem; text-align: center;">Past Events</h2>
+        <div style="display: flex; flex-direction: column; gap: 24px; opacity: 0.7;">
+        {% for event in past_events %}
+          <div class="event-card" style="background: #f9fafb; border-left: 4px solid var(--gray);">
+            <h4 style="margin-bottom: 8px;">{{ event.title }}</h4>
+            <p class="event-meta" style="font-size: 0.9rem;">
+              🗓️ {{ event.start_time|date:"F j, Y" }}
+              {% if event.location %} | 📍 {{ event.location }}{% endif %}
+            </p>
+            <p style="font-size: 0.9rem;">{{ event.description|truncatewords:20 }}</p>
+          </div>
+        {% endfor %}
+        </div>
+      {% endif %}
     </div>
-    
   </div>
 </section>
 {% endblock %}

@@ -36,3 +36,30 @@ class NoticeDeleteView(StaffRequiredMixin, DeleteView):
     model = Notice
     template_name = 'news/notice_confirm_delete.html'
     success_url = reverse_lazy('dashboard-notices')
+
+from .models import Event
+from .forms import EventForm
+
+class DashboardEventListView(StaffRequiredMixin, ListView):
+    model = Event
+    template_name = 'news/dashboard_event_list.html'
+    context_object_name = 'events'
+    ordering = ['-start_time']
+    paginate_by = 20
+
+class EventCreateView(StaffRequiredMixin, CreateView):
+    model = Event
+    form_class = EventForm
+    template_name = 'news/event_form.html'
+    success_url = reverse_lazy('dashboard-events')
+
+class EventUpdateView(StaffRequiredMixin, UpdateView):
+    model = Event
+    form_class = EventForm
+    template_name = 'news/event_form.html'
+    success_url = reverse_lazy('dashboard-events')
+
+class EventDeleteView(StaffRequiredMixin, DeleteView):
+    model = Event
+    template_name = 'news/event_confirm_delete.html'
+    success_url = reverse_lazy('dashboard-events')

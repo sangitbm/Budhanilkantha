@@ -341,6 +341,12 @@
                class="{% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
                📢 Manage Notices
             </a>
+            <a href="{% url 'dashboard-events' %}" class="{% if 'event' in request.resolver_match.url_name %}active{% endif %}">
+               📅 Manage Events
+            </a>
+            <a href="{% url 'dashboard-messages' %}" class="{% if 'message' in request.resolver_match.url_name %}active{% endif %}">
+               📬 Contact Messages
+            </a>
             <a href="{% url 'dashboard-gallery' %}"
                class="{% if 'gallery' in request.resolver_match.url_name or 'photo' in request.resolver_match.url_name %}active{% endif %}">
                📸 Manage Gallery

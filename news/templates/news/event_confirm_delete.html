@@ -1,0 +1,69 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Delete Event{% endblock %}
+
+{% block header_actions %}
+  <a class="btn btn-outline" href="{% url 'dashboard-events' %}" class="btn btn-outline btn-sm">← Back to Events</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .delete-card {
+    max-width: 560px;
+    border-top: 4px solid #e74c3c;
+  }
+
+  .delete-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+  }
+
+  .delete-subject {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    margin-bottom: 24px;
+  }
+
+  .delete-warning {
+    background: rgba(231, 76, 60, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    color: #c0392b;
+    font-size: 0.9rem;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .delete-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+</style>
+
+<div class="card delete-card">
+  <h3 class="delete-title">Delete Event</h3>
+  <p class="delete-subject">
+    Are you sure you want to permanently delete: <strong>"{{ object.title }}"</strong>?
+  </p>
+
+  <div class="delete-warning">
+    ⚠️ This action cannot be undone. The event will be permanently removed.
+  </div>
+
+  <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
+    <form method="post">
+    {% csrf_token %}
+    <div class="delete-actions">
+      <button type="submit" class="btn btn-danger" class="btn btn-danger">🗑 Yes, Delete Event</button>
+      <a class="btn btn-outline" href="{% url 'dashboard-events' %}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+</div>
+{% endblock %}

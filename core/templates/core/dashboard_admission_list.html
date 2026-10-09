@@ -4,120 +4,112 @@
 
 {% block content %}
 <style>
-  .student-name-cell {
-    font-weight: 600;
-    color: var(--text-dark);
+  .student-name-cell { font-weight: 600; color: var(--text-dark); }
+  .parent-name { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+  .grade-badge { background: rgba(26, 75, 140, 0.1); color: var(--primary); font-weight: 600; font-size: 0.82rem; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+  .contact-email { font-size: 0.85rem; color: var(--text-muted); }
+  
+  .filter-bar {
+    display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    background: var(--light-bg); padding: 16px; border-radius: var(--radius);
   }
-
-  .parent-name {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 2px;
+  .filter-bar input, .filter-bar select {
+    padding: 10px 16px; border: 1px solid var(--gray-light); border-radius: var(--radius-sm); outline: none; flex: 1; min-width: 200px;
   }
-
-  .grade-badge {
-    background: rgba(26, 75, 140, 0.1);
-    color: var(--primary);
-    font-weight: 600;
-    font-size: 0.82rem;
-    padding: 4px 10px;
-    border-radius: 20px;
-    display: inline-block;
+  
+  .status-badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
   }
-
-  .contact-email {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-
-  .actions-right {
-    text-align: right;
-  }
-
-  .action-btns-right {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .empty-table-cell {
-    text-align: center;
-    padding: 60px;
-    color: var(--text-muted);
-  }
-
-  .empty-icon {
-    font-size: 2.5rem;
-    margin-bottom: 12px;
-  }
-
-  .summary-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .summary-count {
-    font-size: 0.95rem;
-    color: var(--text-muted);
-  }
-
-  .summary-count strong {
-    color: var(--text-dark);
-  }
+  .status-new { background: #e3f2fd; color: #1565c0; }
+  .status-review { background: #fff8e1; color: #f57f17; }
+  .status-accepted { background: #e8f5e9; color: #2e7d32; }
+  .status-declined { background: #ffebee; color: #c62828; }
 </style>
 
-<div class="summary-bar">
-  <p class="summary-count">Total applications: <strong>{{ applications|length }}</strong></p>
-</div>
+<form method="GET" class="filter-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by name, email, phone...">
+  <select name="status">
+    <option value="">All Statuses</option>
+    {% for val, label in statuses %}
+    <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="grade">
+    <option value="">All Grades</option>
+    <option value="ECD" {% if grade == 'ECD' %}selected{% endif %}>ECD</option>
+    <option value="Nursery" {% if grade == 'Nursery' %}selected{% endif %}>Nursery</option>
+    <option value="LKG" {% if grade == 'LKG' %}selected{% endif %}>LKG</option>
+    <option value="UKG" {% if grade == 'UKG' %}selected{% endif %}>UKG</option>
+    <option value="1" {% if grade == '1' %}selected{% endif %}>Grade 1</option>
+    <option value="2" {% if grade == '2' %}selected{% endif %}>Grade 2</option>
+    <!-- Add more as needed -->
+  </select>
+  <button type="submit" class="btn btn-primary" style="padding: 10px 24px; min-width:auto;">Filter</button>
+  <a href="{% url 'dashboard-admissions' %}" class="btn btn-outline" style="padding: 10px 24px; min-width:auto;">Clear</a>
+</form>
 
 <div class="card">
-    <div class="table-responsive">
+  <div class="table-responsive">
     <table class="table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Student Name</th>
-                <th>Grade Applying For</th>
+                <th>Student</th>
+                <th>Grade</th>
                 <th>Contact</th>
+                <th>Status</th>
                 <th>Submitted</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for app in applications %}
             <tr>
-                <td>{{ forloop.counter }}</td>
                 <td>
                   <div class="student-name-cell">{{ app.student_name }}</div>
                   <div class="parent-name">Parent: {{ app.parent_name }}</div>
                 </td>
-                <td>
-                  <span class="grade-badge">Grade {{ app.grade_applying_for }}</span>
-                </td>
+                <td><span class="grade-badge">{{ app.grade_applying_for }}</span></td>
                 <td>
                   <div>📞 {{ app.phone_number }}</div>
                   <div class="contact-email">✉️ {{ app.email }}</div>
                 </td>
+                <td>
+                  <span class="status-badge 
+                    {% if app.status == 'NEW' %}status-new{% elif app.status == 'REVIEW' %}status-review{% elif app.status == 'ACCEPTED' %}status-accepted{% else %}status-declined{% endif %}">
+                    {{ app.get_status_display }}
+                  </span>
+                </td>
                 <td>{{ app.submitted_at|date:"M d, Y" }}</td>
+                <td>
+                  <a href="{% url 'dashboard-admission-update' app.pk %}" class="btn btn-outline btn-sm">Update</a>
+                </td>
             </tr>
             {% empty %}
             <tr>
                 <td colspan="100">
-    <div class="empty-state">
-        <span class="empty-state-icon">📁</span>
-        <p>
-                    <div class="empty-icon">📋</div>
-                    <p>No admission applications have been submitted yet.</p>
-                </p>
-    </div>
-</td>
+                    <div class="empty-state">
+                        <span class="empty-state-icon">📋</span>
+                        <p>No admission applications found matching your criteria.</p>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
+  </div>
+  
+  {% if is_paginated %}
+  <div style="margin-top: 24px; text-align: center;">
+      {% if page_obj.has_previous %}
+          <a href="?page=1{% if q %}&q={{q}}{% endif %}{% if status %}&status={{status}}{% endif %}{% if grade %}&grade={{grade}}{% endif %}" class="btn btn-outline btn-sm">&laquo; First</a>
+          <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{q}}{% endif %}{% if status %}&status={{status}}{% endif %}{% if grade %}&grade={{grade}}{% endif %}" class="btn btn-outline btn-sm">Previous</a>
+      {% endif %}
+      <span style="margin: 0 16px; color: var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{q}}{% endif %}{% if status %}&status={{status}}{% endif %}{% if grade %}&grade={{grade}}{% endif %}" class="btn btn-outline btn-sm">Next</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{q}}{% endif %}{% if status %}&status={{status}}{% endif %}{% if grade %}&grade={{grade}}{% endif %}" class="btn btn-outline btn-sm">Last &raquo;</a>
+      {% endif %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

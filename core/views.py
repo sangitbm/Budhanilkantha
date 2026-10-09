@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 
-from news.models import Notice
+from news.models import Notice, Event
 from gallery.models import Photo
 from records.models import Student, Staff
 from .models import AdmissionInquiry, SiteSettings, HeroImage, AcademicProgram
@@ -23,11 +23,35 @@ class HomePageView(TemplateView):
 class AboutView(TemplateView):
     template_name = 'core/about.html'
 
-class ContactView(TemplateView):
-    template_name = 'core/contact.html'
 
-class EventsView(TemplateView):
+from .forms import ContactMessageForm
+class ContactView(CreateView):
+    template_name = 'core/contact.html'
+    form_class = ContactMessageForm
+    success_url = reverse_lazy('contact')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your message has been sent successfully. We will get back to you soon.")
+        return super().form_valid(form)
+
+
+
+class EventsView(ListView):
     template_name = 'core/events.html'
+    model = Event
+    context_object_name = 'events'
+    
+    def get_queryset(self):
+        from django.utils import timezone
+        from django.db.models import Q
+        return Event.objects.filter(Q(start_time__gte=timezone.now()) | Q(start_time__isnull=True)).order_by('start_time')
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from django.utils import timezone
+        context['past_events'] = Event.objects.filter(start_time__lt=timezone.now()).order_by('-start_time')
+        return context
+
 
 class AdmissionCreateView(CreateView):
     model = AdmissionInquiry
@@ -35,11 +59,43 @@ class AdmissionCreateView(CreateView):
     template_name = 'core/admission_form.html'
     success_url = reverse_lazy('home')
 
+
+from django.db.models import Q
+
 class DashboardAdmissionListView(StaffRequiredMixin, ListView):
     model = AdmissionInquiry
     template_name = 'core/dashboard_admission_list.html'
     context_object_name = 'applications'  
-    ordering = ['-submitted_at'] 
+    ordering = ['-submitted_at']
+    paginate_by = 20
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q')
+        status = self.request.GET.get('status')
+        grade = self.request.GET.get('grade')
+        
+        if query:
+            queryset = queryset.filter(
+                Q(student_name__icontains=query) |
+                Q(parent_name__icontains=query) |
+                Q(email__icontains=query) |
+                Q(phone_number__icontains=query)
+            )
+        if status:
+            queryset = queryset.filter(status=status)
+        if grade:
+            queryset = queryset.filter(grade_applying_for__icontains=grade)
+            
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '')
+        context['status'] = self.request.GET.get('status', '')
+        context['grade'] = self.request.GET.get('grade', '')
+        context['statuses'] = AdmissionInquiry.STATUS_CHOICES
+        return context
 
 def teachers_view(request):
     context = {
@@ -55,15 +111,25 @@ def staff_directory_view(request):
     return render(request, 'core/staff_directory.html', context)
 
 
+
 @staff_required
 def dashboard_index_view(request):
+    from django.utils import timezone
+    recent_admissions = AdmissionInquiry.objects.all().order_by('-submitted_at')[:5]
+    upcoming_events = Event.objects.filter(start_time__gte=timezone.now()).order_by('start_time')[:5]
+    recent_notices = Notice.objects.all().order_by('-created_at')[:5]
+
     context = {
         'notices_count': Notice.objects.count(),
         'photos_count': Photo.objects.count(),
         'students_count': Student.objects.count(),
-        'staff_count': Staff.objects.count()
+        'staff_count': Staff.objects.count(),
+        'recent_admissions': recent_admissions,
+        'upcoming_events': upcoming_events,
+        'recent_notices': recent_notices,
     }
     return render(request, 'core/dashboard_index.html', context)
+
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseForbidden
@@ -266,3 +332,26 @@ class TestimonialDeleteView(StaffRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Testimonial deleted.")
         return super().delete(request, *args, **kwargs)
+
+
+from .forms import AdmissionStaffForm
+
+class DashboardAdmissionUpdateView(StaffRequiredMixin, UpdateView):
+    model = AdmissionInquiry
+    form_class = AdmissionStaffForm
+    template_name = 'core/dashboard_admission_form.html'
+    success_url = reverse_lazy('dashboard-admissions')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Admission status updated successfully.")
+        return super().form_valid(form)
+
+
+from .models import ContactMessage
+
+class DashboardContactListView(StaffRequiredMixin, ListView):
+    model = ContactMessage
+    template_name = 'core/dashboard_contact_list.html'
+    context_object_name = 'messages'
+    ordering = ['-submitted_at']
+    paginate_by = 20

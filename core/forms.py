@@ -1,6 +1,27 @@
 from django import forms
 
-from .models import AdmissionInquiry, SiteSettings, Testimonial
+from .models import AdmissionInquiry, SiteSettings, Testimonial, ContactMessage
+
+
+class ContactMessageForm(forms.ModelForm):
+    honeypot = forms.CharField(required=False, widget=forms.HiddenInput, label="Leave empty")
+
+    class Meta:
+        model = ContactMessage
+        fields = ['name', 'email', 'subject', 'message']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Your Email'}),
+            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Subject'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Your Message'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('honeypot'):
+            raise forms.ValidationError("Spam detected.")
+        return cleaned_data
+
 
 class AdmissionForm(forms.ModelForm):
     class Meta:
@@ -86,4 +107,14 @@ class TestimonialForm(forms.ModelForm):
             'role': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Student (Grade 10)'}),
             'quote': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'maxlength': '300'}),
             'order': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class AdmissionStaffForm(forms.ModelForm):
+    class Meta:
+        model = AdmissionInquiry
+        fields = ['status', 'internal_note']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'internal_note': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Internal notes...'}),
         }

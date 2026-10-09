@@ -1,0 +1,100 @@
+{% extends 'core/dashboard_base.html' %}
+
+{% block page_title %}Manage Events{% endblock %}
+
+{% block header_actions %}
+  <a href="{% url 'add-event' %}" class="btn btn-primary">+ Add New Event</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .event-title-cell {
+    font-weight: 500;
+    color: var(--text-dark);
+  }
+
+  .event-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .event-link:hover {
+    text-decoration: underline;
+  }
+
+  .no-attachment {
+    color: var(--text-muted);
+  }
+
+  .actions-right {
+    text-align: right;
+  }
+
+  .action-btns-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .empty-table-cell {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+</style>
+
+<div class="card">
+    <div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Start Time Posted</th>
+                <th>Ticker</th>
+                <th>Attachment</th>
+                <th class="actions-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td class="event-title-cell">{{ event.title }}</td>
+                <td>{{ event.start_time|date:"M d, Y" }}</td>
+                <td>
+                    {% if event.show_in_ticker %}
+                    <span style="color: #10b981; font-weight: bold;">✓ Yes</span>
+                    {% else %}
+                    <span style="color: #ef4444;">✗ No</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if event.file_attachment %}
+                    <a href="{{ event.file_attachment.url }}" target="_blank" class="event-link">📄 View</a>
+                    {% else %}
+                    <span class="no-attachment">—</span>
+                    {% endif %}
+                </td>
+                <td class="actions-right">
+                    <div class="action-btns-right">
+                        <a href="{% url 'edit-event' event.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'delete-event' event.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="100">
+    <div class="empty-state">
+        <span class="empty-state-icon">📁</span>
+        <p>
+                    📢 No events have been added yet.
+                </p>
+    </div>
+</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+{% endblock %}

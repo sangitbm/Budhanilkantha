@@ -5,64 +5,98 @@
 
 {% block content %}
 <style>
-  .contact-subtitle {
-    margin-bottom: 24px;
-  }
-  
-  .contact-card {
-    background: var(--light-bg); 
-    padding: 40px; 
-    border-radius: var(--radius); 
-    max-width: 600px; 
-    margin: 0 auto; 
-    box-shadow: var(--shadow);
-  }
-  
-  .contact-detail {
-    margin-bottom: 12px; 
-    font-size: 1.1rem;
-  }
-  
-  .contact-address {
-    font-size: 1.1rem;
-  }
-  
-  .text-primary-color {
-    color: var(--primary);
-  }
-  
-  .text-muted-color {
-    color: var(--text-muted);
-  }
+  .contact-subtitle { margin-bottom: 24px; }
+  .contact-card { background: var(--light-bg); padding: 40px; border-radius: var(--radius); max-width: 600px; margin: 0 auto; box-shadow: var(--shadow); }
+  .contact-detail { margin-bottom: 12px; font-size: 1.1rem; }
+  .contact-address { font-size: 1.1rem; }
+  .text-primary-color { color: var(--primary); }
+  .text-muted-color { color: var(--text-muted); }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+  .form-error { color: #dc3545; font-size: 0.85rem; margin-top: 4px; }
+  .form-control.has-error { border-color: #dc3545; }
 </style>
 
 <section class="section-padding">
   <div class="container text-center">
     <h1 class="section-title">Contact Information</h1>
+    <p class="section-subtitle contact-subtitle" style="margin-left: auto; margin-right: auto;">Get in touch with us for any inquiries.</p>
     
-    <p class="section-subtitle contact-subtitle">Get in touch with us for any inquiries.</p>
-    
-    <div class="contact-card">
-      <p class="contact-detail">
-        <strong>Email:</strong> 
-        <span class="text-primary-color">{{ site_settings.email_general }}</span>
-      </p>
-      
-      <p class="contact-detail">
-        <strong>Phone:</strong> 
-        <span class="text-primary-color">{{ site_settings.phone_primary }}</span>
-      </p>
-      {% if site_settings.phone_secondary %}
-      <p class="contact-detail">
-        <strong>Secondary Phone:</strong> 
-        <span class="text-primary-color">{{ site_settings.phone_secondary }}</span>
-      </p>
-      {% endif %}
-      
-      <p class="contact-address">
-        <strong>Address:</strong> 
-        <span class="text-muted-color">{{ site_settings.address }}</span>
-      </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; text-align: left; margin-top: 40px;">
+      <!-- Contact Info -->
+      <div class="contact-card" style="margin: 0;">
+        <h3 style="margin-bottom: 20px;">Get in Touch</h3>
+        <p class="contact-detail">
+          <strong>Email:</strong> 
+          <a href="mailto:{{ site_settings.email_general }}" class="text-primary-color">{{ site_settings.email_general }}</a>
+        </p>
+        
+        <p class="contact-detail">
+          <strong>Phone:</strong> 
+          <a href="tel:{{ site_settings.phone_primary|cut:' ' }}" class="text-primary-color">{{ site_settings.phone_primary }}</a>
+        </p>
+        {% if site_settings.phone_secondary %}
+        <p class="contact-detail">
+          <strong>Secondary Phone:</strong> 
+          <a href="tel:{{ site_settings.phone_secondary|cut:' ' }}" class="text-primary-color">{{ site_settings.phone_secondary }}</a>
+        </p>
+        {% endif %}
+        
+        <p class="contact-address">
+          <strong>Address:</strong> 
+          <span class="text-muted-color">{{ site_settings.address }}</span>
+        </p>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="card" style="padding: 40px; background: white; border-radius: var(--radius); box-shadow: var(--shadow);">
+        <h3 style="margin-bottom: 20px;">Send a Message</h3>
+        <form method="POST" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div style="display: none;">
+              {{ form.honeypot }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="form-error">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email *</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="form-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.subject.id_for_label }}">Subject *</label>
+                {{ form.subject }}
+                {% if form.subject.errors %}
+                    <div class="form-error">{{ form.subject.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.message.id_for_label }}">Message *</label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                    <div class="form-error">{{ form.message.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Send Message</button>
+        </form>
+      </div>
     </div>
   </div>
 </section>

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     HomePageView, AboutView, ContactView, EventsView,
-    AdmissionCreateView, DashboardAdmissionListView,
+    AdmissionCreateView, DashboardAdmissionListView, DashboardAdmissionUpdateView, DashboardContactListView,
     teachers_view, staff_directory_view,
     dashboard_index_view, dashboard_settings_view, program_remove_view,
     DashboardTestimonialListView, TestimonialCreateView,
@@ -23,6 +23,9 @@ urlpatterns = [
     # Admin Dashboard
     path('dashboard/', dashboard_index_view, name='dashboard'),
     path('dashboard/admissions/', DashboardAdmissionListView.as_view(), name='dashboard-admissions'),
+
+    path('dashboard/admissions/<int:pk>/update/', DashboardAdmissionUpdateView.as_view(), name='dashboard-admission-update'),
+    path('dashboard/messages/', DashboardContactListView.as_view(), name='dashboard-messages'),
     path('dashboard/settings/', dashboard_settings_view, name='dashboard-settings'),
     path('dashboard/settings/programs/<int:pk>/remove/', program_remove_view, name='program-remove'),
     path('dashboard/testimonials/', DashboardTestimonialListView.as_view(), name='dashboard-testimonials'),

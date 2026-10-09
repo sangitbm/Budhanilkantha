@@ -1,11 +1,32 @@
 from django.db import models
 
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.subject} - {self.name}"
+
 class AdmissionInquiry(models.Model):
     student_name = models.CharField(max_length=100)
     parent_name = models.CharField(max_length=100)
     email = models.EmailField()
     phone_number = models.CharField(max_length=15)
     grade_applying_for = models.CharField(max_length=20)
+    STATUS_CHOICES = [
+        ('NEW', 'New'),
+        ('REVIEW', 'In Review'),
+        ('ACCEPTED', 'Accepted'),
+        ('DECLINED', 'Declined')
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NEW')
+    internal_note = models.TextField(blank=True)
+
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
