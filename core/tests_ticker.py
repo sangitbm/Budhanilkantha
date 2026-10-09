@@ -5,9 +5,12 @@ from core.models import SiteSettings
 
 class TickerTestCase(TestCase):
     def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
         # Create site settings
         self.site_settings = SiteSettings.get_settings()
         self.site_settings.marquee_text = "Test Marquee"
+        self.site_settings.ticker_enabled = True
         self.site_settings.save()
         
         # Create notices
@@ -15,7 +18,7 @@ class TickerTestCase(TestCase):
         for i in range(6):
             notice = Notice.objects.create(
                 title=f"Test Notice {i}",
-                description=f"Content {i}"
+                description=f"Content {i}", show_in_ticker=True
             )
             self.notices.append(notice)
             

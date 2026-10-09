@@ -1,0 +1,315 @@
+.about {
+    background: var(--white);
+}
+
+.about-grid {
+    display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center; display: grid;
+  grid-template-columns: 55% minmax(0, 45%);
+  gap: 64px;
+  align-items: center;
+}
+
+.about-text .section-title {
+    margin-bottom: 16px;
+}
+
+.about-text p {
+    color: var(--text-muted);
+  margin-bottom: 16px;
+  font-size: 1.05rem;
+}
+
+.about-text .program-tags {
+    display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 28px;
+}
+
+.about-image {
+    background: var(--light-bg);
+  border-radius: var(--radius);
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.gallery {
+    background: var(--light-bg);
+}
+
+.gallery-grid {
+    display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+}
+
+.gallery-item {
+    background: var(--white);
+  aspect-ratio: 1/1;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.gallery-item:hover {
+    transform: scale(1.02);
+  box-shadow: var(--shadow-hover);
+}
+
+.gallery-item:nth-child(1) {
+    grid-column: span 2;
+  grid-row: span 2;
+}
+
+.gallery-cta {
+    text-align: center;
+  margin-top: 32px;
+}
+
+.footer-links li,
+.footer-contact li {
+    margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+}
+
+.footer-contact li {
+    display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.footer-contact li svg {
+    flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent);
+}
+
+.about-section {
+    padding: 96px 0;
+}
+
+.about-grid.no-image {
+    grid-template-columns: 1fr;
+}
+
+.about-text-wrapper {
+    width: 100%;
+  max-width: 65ch;
+  margin: 0 auto;
+}
+
+.about-subtitle {
+    color: var(--primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.about-title {
+    text-wrap: balance;
+  font-size: 2.2rem;
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+.about-p {
+    font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.about-values {
+    display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.about-value-item {
+    display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.about-value-icon {
+    flex-shrink: 0;
+  color: var(--primary);
+}
+
+.about-principal {
+    background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 32px;
+  border-left: 4px solid var(--accent);
+  text-align: left;
+}
+
+.about-principal-img {
+    width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.about-principal-img-placeholder {
+    width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.about-principal-quote {
+    font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.about-principal-name {
+    font-weight: 600;
+  color: var(--primary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.about-principal-role {
+    color: var(--text-muted);
+  font-weight: 400;
+}
+
+.about-btn {
+    display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-img-wrapper {
+    width: 100%;
+  position: relative;
+}
+
+.about-img {
+    width: 100%;
+  max-height: 480px;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.about-badge {
+    position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: var(--white);
+  padding: 12px 16px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+}
+
+.about-badge-icon {
+    background: rgba(26, 74, 138, 0.1);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.about-badge-text-wrapper {
+    text-align: left;
+}
+
+.about-badge-label {
+    font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.about-badge-value {
+    font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.contact-subtitle {
+    margin-bottom: 24px;
+}
+
+.contact-card {
+    background: var(--light-bg); padding: 40px; border-radius: var(--radius); max-width: 600px; margin: 0 auto; box-shadow: var(--shadow);
+}
+
+.contact-detail {
+    margin-bottom: 12px; font-size: 1.1rem;
+}
+
+.contact-address {
+    font-size: 1.1rem;
+}
+
+#tab-school:checked ~ .settings-layout .st-card-school,
+    #tab-about:checked ~ .settings-layout .st-card-about,
+    #tab-programs:checked ~ .settings-layout .st-card-programs,
+    #tab-contact:checked ~ .settings-layout .st-card-contact,
+    #tab-social:checked ~ .settings-layout .st-card-social,
+    #tab-admissions:checked ~ .settings-layout .st-card-admissions,
+    #tab-seo:checked ~ .settings-layout .st-card-seo,
+    #tab-advanced:checked ~ .settings-layout .st-card-advanced {
+    display: block;
+        animation: st-fade-in 0.3s ease;
+}
+
+#tab-school:checked ~ .settings-layout .st-menu-school,
+    #tab-about:checked ~ .settings-layout .st-menu-about,
+    #tab-programs:checked ~ .settings-layout .st-menu-programs,
+    #tab-contact:checked ~ .settings-layout .st-menu-contact,
+    #tab-social:checked ~ .settings-layout .st-menu-social,
+    #tab-admissions:checked ~ .settings-layout .st-menu-admissions,
+    #tab-seo:checked ~ .settings-layout .st-menu-seo,
+    #tab-advanced:checked ~ .settings-layout .st-menu-advanced {
+    background: #eef2ff;
+        color: var(--primary);
+}
+

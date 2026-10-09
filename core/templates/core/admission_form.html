@@ -3,107 +3,50 @@
 {% block title %}Admission Form - {{ site_settings.school_name }}{% endblock %}
 
 {% block content %}
-<style>
-  .admission-form-wrapper {
-    max-width: 600px; 
-    margin: 0 auto; 
-    background: var(--white); 
-    padding: 40px; 
-    border-radius: var(--radius); 
-    box-shadow: var(--shadow);
-  }
-  
-  .admission-subtitle {
-    margin-bottom: 24px;
-  }
-  
-  .btn-full-width {
-    width: 100%; 
-    margin-top: 24px;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-    text-align: left;
-  }
-
-  .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
-
-  .form-error {
-    color: #dc3545;
-    font-size: 0.85rem;
-    margin-top: 4px;
-  }
-
-  .form-control.has-error {
-    border-color: #dc3545;
-  }
-</style>
-
 <div class="container section-padding text-center">
-    <div class="admission-form-wrapper">
-
-        <h1 class="section-title">Admissions Application</h1>
-        <p class="section-subtitle admission-subtitle" style="margin-left: auto; margin-right: auto;">Please fill out the form below to apply for admission.</p>
+    <div class="form-card" style="max-width: 600px; margin: 0 auto; text-align: left;">
+        <h1 class="section-title text-center">Admissions Application</h1>
+        <p class="section-subtitle text-center" style="margin-bottom: 24px;">Please fill out the form below to apply for admission.</p>
         
         <form method="POST" novalidate>
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-            <div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
-                {% for error in form.non_field_errors %}
-                    {{ error }}
-                {% endfor %}
+            <div class="form-error-summary">
+                Please correct the errors below.
+                <ul>
+                    {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
 
-            <div class="form-group">
-                <label for="{{ form.student_name.id_for_label }}">Student Full Name *</label>
-                {{ form.student_name }}
-                {% if form.student_name.errors %}
-                    <div class="form-error">{{ form.student_name.errors.0 }}</div>
-                {% endif %}
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+                {% for field in form %}
+                <div class="form-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                        <span class="form-required">*</span>
+                        {% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <small class="form-help">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="form-field-error">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.parent_name.id_for_label }}">Parent Full Name *</label>
-                {{ form.parent_name }}
-                {% if form.parent_name.errors %}
-                    <div class="form-error">{{ form.parent_name.errors.0 }}</div>
-                {% endif %}
+            <div class="form-actions" style="margin-top: 24px; padding-top: 0; border-top: none;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Submit Application
+                </button>
             </div>
-
-            <div class="form-group">
-                <label for="{{ form.email.id_for_label }}">Email Address *</label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="form-error">{{ form.email.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.phone_number.id_for_label }}">Phone Number *</label>
-                {{ form.phone_number }}
-                {% if form.phone_number.errors %}
-                    <div class="form-error">{{ form.phone_number.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.grade_applying_for.id_for_label }}">Grade Applying For *</label>
-                {{ form.grade_applying_for }}
-                {% if form.grade_applying_for.errors %}
-                    <div class="form-error">{{ form.grade_applying_for.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-full-width">
-                Submit Application
-            </button>
         </form>
 
     </div>

@@ -4,7 +4,7 @@ from .models import Notice, Event
 class NoticeForm(forms.ModelForm):
     class Meta:
         model = Notice
-        fields = '__all__'
+        fields = ['title', 'description', 'file_attachment', 'show_in_ticker']
 
 class EventForm(forms.ModelForm):
     class Meta:

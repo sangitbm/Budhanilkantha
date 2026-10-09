@@ -1,0 +1,240 @@
+
+
+/* Unified Form Styles extracted from record_form.html */
+
+    .unified-form-page {
+        width: 100%;
+        max-width: 1040px;
+        margin: 0 auto;
+    }
+
+    .unified-form-breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-bottom: 20px;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .unified-form-breadcrumb a {
+        color: #1d4ed8;
+        text-decoration: none;
+    }
+
+    .unified-form-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .unified-form-heading {
+        margin-bottom: 22px;
+    }
+
+    .unified-form-heading h2 {
+        margin: 0 0 6px;
+        color: #0f172a;
+        font-size: clamp(1.4rem, 3vw, 1.8rem);
+    }
+
+    .unified-form-heading p {
+        margin: 0;
+        color: #64748b;
+    }
+
+    .unified-form-card {
+        padding: clamp(20px, 4vw, 32px);
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 12px 32px rgb(15 23 42 / 7%);
+    }
+
+    .unified-form-section-heading {
+        margin: 0 0 22px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .unified-form-section-heading h3 {
+        margin: 0 0 5px;
+        color: #0f172a;
+        font-size: 1.1rem;
+    }
+
+    .unified-form-section-heading p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .unified-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+    }
+
+    .unified-form-field {
+        min-width: 0;
+    }
+
+    .unified-form-field>label {
+        display: block;
+        margin-bottom: 7px;
+        color: #1e293b;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .unified-form-required {
+        color: #b91c1c;
+    }
+
+    .unified-form-field input:not([type="checkbox"]):not([type="radio"]),
+    .unified-form-field select,
+    .unified-form-field textarea {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #0f172a;
+        font: inherit;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .unified-form-field textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .unified-form-field input:focus,
+    .unified-form-field select:focus,
+    .unified-form-field textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgb(37 99 235 / 16%);
+    }
+
+    .unified-form-help {
+        display: block;
+        margin: 6px 0 0;
+        color: #64748b;
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
+
+    .unified-form-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        min-height: 46px;
+        padding: 13px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+    }
+
+    .unified-form-checkbox input[type="checkbox"] {
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        margin: 2px 0 0;
+        accent-color: #1d4ed8;
+    }
+
+    .unified-form-checkbox label {
+        margin: 0;
+        color: #1e293b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    /* Is active switch */
+    .unified-form-checkbox-active {
+        min-height: 70px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 16px;
+    }
+
+    .unified-form-checkbox-active>div {
+        flex: 1;
+    }
+
+    .unified-form-checkbox-active .unified-form-help {
+        margin-top: 4px;
+    }
+
+
+
+    .unified-form-error-summary,
+    .unified-form-field-error {
+        color: #b91c1c;
+        font-size: 0.86rem;
+    }
+
+    .unified-form-error-summary {
+        margin: 0 0 20px;
+        padding: 12px 14px;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        background: #fef2f2;
+    }
+
+    .unified-form-error-summary ul {
+        margin: 6px 0 0;
+        padding-left: 20px;
+    }
+
+    .unified-form-field-error {
+        margin: 7px 0 0;
+    }
+
+    .unified-form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .unified-form-actions .btn {
+        min-width: 128px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (max-width: 640px) {
+        .unified-form-grid {
+            grid-template-columns: 1fr;
+            gap: 17px;
+        }
+
+        .unified-form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .unified-form-actions .btn {
+            width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .unified-form-field input,
+        .unified-form-field select,
+        .unified-form-field textarea,
+        .unified-form-checkbox-active input[type="checkbox"],
+        .unified-form-checkbox-active input[type="checkbox"]::before {
+            transition: none;
+        }
+    }

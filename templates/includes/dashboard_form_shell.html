@@ -1,0 +1,113 @@
+{% extends 'core/dashboard_base.html' %}
+{% load static %}
+
+{% block page_title %}
+{% if object %}Edit{% else %}Add{% endif %} {{ form_title|default:"Record" }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <nav class="form-breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <span aria-hidden="true">›</span>
+        {% if cancel_url %}
+            <a href="{{ cancel_url }}">{{ cancel_url_name|default:"List" }}</a>
+            <span aria-hidden="true">›</span>
+        {% endif %}
+        <span>{% if object %}Edit{% else %}Add{% endif %} {{ form_title|default:"Record" }}</span>
+    </nav>
+
+    <header class="form-heading">
+        <h2>{{ form_title }}</h2>
+        <p>
+            {{ form_subtitle|default:"Enter the details below." }} Fields marked
+            <span class="form-required" aria-hidden="true">*</span> are required.
+        </p>
+    </header>
+
+    <section class="form-card" aria-labelledby="form-title">
+        <div class="form-section-heading">
+            <h3 id="form-title">{{ form_title }} details</h3>
+            <p>Make sure the information is accurate before saving.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="genericForm">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="form-error-summary" role="alert">
+                <strong>Please correct the following:</strong>
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-field">
+                    {% if field.field.widget.input_type == "checkbox" %}
+                    
+                        {% if field.name == "is_active" or field.name == "show_in_ticker" %}
+                        <div class="form-checkbox form-checkbox-active">
+                            <div>
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {% if field.help_text %}
+                                <small class="form-help">{{ field.help_text }}</small>
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                <p class="form-field-error" role="alert">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {{ field }}
+                        </div>
+                        {% else %}
+                        <div class="form-checkbox">
+                            {{ field }}
+                            <div>
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {% if field.help_text %}
+                                <small class="form-help">{{ field.help_text }}</small>
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                <p class="form-field-error" role="alert">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                    {% else %}
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                            <span class="form-required" aria-hidden="true">*</span>
+                            {% endif %}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                        <small class="form-help">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                        <p class="form-field-error" role="alert">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {{ submit_label|default:"Save" }}
+                </button>
+
+                {% if cancel_url %}
+                <a href="{{ cancel_url }}" class="btn btn-outline">Cancel</a>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

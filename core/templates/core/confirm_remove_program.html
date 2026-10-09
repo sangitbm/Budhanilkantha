@@ -1,20 +1,2 @@
-{% extends "base.html" %}
-
-{% block title %}Confirm Removal - Budhanilkantha Secondary School{% endblock %}
-
-{% block content %}
-<div style="max-width: 600px; margin: 80px auto; padding: 32px; background: white; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); text-align: center;">
-    <h1 style="color: var(--primary); margin-bottom: 16px;">Confirm Removal</h1>
-    <p style="margin-bottom: 24px; color: var(--text-color); font-size: 1.1rem;">
-        Are you sure you want to remove the program <strong>"{{ program.title }}"</strong>?
-    </p>
-    
-    <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
-    <form method="post" style="display: flex; gap: 16px; justify-content: center;">
-        {% csrf_token %}
-        <a class="btn btn-outline" href="{% url 'dashboard-settings' %}?tab=programs" class="btn btn-outline" style="min-width: 120px;">Cancel</a>
-        <button type="submit" class="btn btn-danger" class="btn btn-primary" style="background: #e74c3c; border-color: #e74c3c; min-width: 120px;">Yes, remove</button>
-    </form>
-</div>
-</div>
-{% endblock %}
+{% url 'dashboard-settings' as cancel_url %}
+{% include 'includes/dashboard_delete_shell.html' with object_type="Program" object_name=program.title object=program.title cancel_url=cancel_url cancel_url_name="Settings" %}

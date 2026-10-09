@@ -1,16 +1,22 @@
+from django.urls import reverse, reverse_lazy
+from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render, redirect
-from django.views.generic import TemplateView, CreateView, ListView
 from core.permissions import StaffRequiredMixin, staff_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse_lazy, reverse
 from django.contrib import messages
-
 from news.models import Notice, Event
 from gallery.models import Photo
 from records.models import Student, Staff
 from .models import AdmissionInquiry, SiteSettings, HeroImage, AcademicProgram
 from .forms import AdmissionForm, SiteSettingsForm
+from .forms import ContactMessageForm
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from .forms import AcademicProgramForm
+from core.constants import ALLOWED_TABS, ALL_GRADES, FIELD_TO_TAB, GROUPED_GRADES
+from .models import Testimonial
+from .forms import TestimonialForm
+from .forms import AdmissionStaffForm
+from .models import ContactMessage
 
 class HomePageView(TemplateView):
     template_name = 'core/home.html'
@@ -24,7 +30,6 @@ class AboutView(TemplateView):
     template_name = 'core/about.html'
 
 
-from .forms import ContactMessageForm
 class ContactView(CreateView):
     template_name = 'core/contact.html'
     form_class = ContactMessageForm
@@ -60,7 +65,6 @@ class AdmissionCreateView(CreateView):
     success_url = reverse_lazy('home')
 
 
-from django.db.models import Q
 
 class DashboardAdmissionListView(StaffRequiredMixin, ListView):
     model = AdmissionInquiry
@@ -131,30 +135,46 @@ def dashboard_index_view(request):
     return render(request, 'core/dashboard_index.html', context)
 
 
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseForbidden
 
 
-ALLOWED_TABS = ['school', 'about', 'programs', 'contact', 'social', 'admissions', 'advanced']
-ALL_GRADES = ['ECD', 'Nursery', 'LKG', 'UKG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
-FIELD_TO_TAB = {
-    'school_name': 'school', 'school_short_name': 'school', 'marquee_text': 'school', 'ticker_enabled': 'school', 'tagline': 'school',
-    'established_year': 'school', 'principal_name': 'school', 'principal_photo': 'school', 'principal_message': 'school',
-    'about_short': 'school', 'logo': 'school', 'favicon': 'school',
-    'about_image': 'about', 'about_text': 'about', 'curriculum_text': 'about',
-    'value_1': 'about', 'value_2': 'about', 'value_3': 'about',
-    'stat_students': 'about', 'stat_faculty': 'about', 'stat_support': 'about',
-    'phone_primary': 'contact', 'phone_secondary': 'contact', 'email_general': 'contact', 'email_admissions': 'contact',
-    'address': 'contact', 'google_maps_url': 'contact', 'office_hours': 'contact',
-    'facebook_url': 'social', 'youtube_url': 'social', 'twitter_url': 'social', 'instagram_url': 'social', 'whatsapp_url': 'social',
-    'admissions_open': 'admissions', 'admissions_btn_label': 'admissions', 'admissions_btn_link': 'admissions',
-    'admissions_badge': 'admissions', 'admissions_start': 'admissions', 'admissions_end': 'admissions', 'admissions_message': 'admissions',
-    'meta_description': 'advanced', 'og_title': 'advanced', 'og_image': 'advanced', 'maintenance_mode': 'advanced'
-}
+
+def normalize_tab(raw):
+    if raw and raw.startswith('tab_'):
+        raw = raw[4:]
+    if raw not in ALLOWED_TABS:
+        return 'school'
+    return raw
+
+def save_hero_images(settings_obj, files):
+    for img in files:
+        HeroImage.objects.create(site_settings=settings_obj, image=img)
+
+def handle_hero_delete(request, settings_obj):
+    delete_id = request.POST.get('delete_hero_image_id')
+    if delete_id:
+        try:
+            hero_img = HeroImage.objects.get(id=delete_id, site_settings=settings_obj)
+            hero_img.delete()
+            messages.success(request, 'Hero image removed.')
+            return True
+        except HeroImage.DoesNotExist:
+            pass
+    return False
+
+def build_tab_errors(form, prog_forms=None):
+    tab_errors = {tab: 0 for tab in ALLOWED_TABS}
+    if hasattr(form, 'errors') and form.errors:
+        for field in form.errors:
+            if field in FIELD_TO_TAB:
+                tab_errors[FIELD_TO_TAB[field]] += 1
+    if prog_forms:
+        for pform in prog_forms:
+            if pform.errors:
+                tab_errors['programs'] += 1
+    return tab_errors
 
 @staff_required
 def program_remove_view(request, pk):
-    
     settings_obj = SiteSettings.get_settings()
     program = get_object_or_404(AcademicProgram, pk=pk, site_settings=settings_obj)
     
@@ -168,124 +188,110 @@ def program_remove_view(request, pk):
 
 @staff_required
 def dashboard_settings_view(request):
-        
     settings_obj = SiteSettings.get_settings()
-    active_tab = request.GET.get('tab', 'school')
-
+    active_tab = normalize_tab(request.GET.get('tab', 'school'))
+    
     if request.method == 'POST':
-        active_tab = request.POST.get('settings_tab', request.POST.get('tab', active_tab))
-        if active_tab and active_tab.startswith('tab_'):
-            active_tab = active_tab[4:]
-        if active_tab not in ALLOWED_TABS:
-            active_tab = 'school'
-
-        # Handle hero image deletion
-        delete_id = request.POST.get('delete_hero_image_id')
-        if delete_id:
-            try:
-                hero_img = HeroImage.objects.get(id=delete_id, site_settings=settings_obj)
-                hero_img.delete()
-                messages.success(request, 'Hero image removed.')
-            except HeroImage.DoesNotExist:
-                pass
+        active_tab = normalize_tab(request.POST.get('settings_tab', request.POST.get('tab', active_tab)))
+        
+        if handle_hero_delete(request, settings_obj):
             return redirect(reverse('dashboard-settings') + f'?tab={active_tab}')
-
-        # Handle Academic Program deletion redirect
+            
         delete_prog_id = request.POST.get('delete_program_id')
         if delete_prog_id:
             return redirect('program-remove', pk=delete_prog_id)
-
+            
         form = SiteSettingsForm(request.POST, request.FILES, instance=settings_obj)
-        if form.is_valid():
-            obj = form.save(commit=False)
-            obj.open_grades = request.POST.getlist('open_grades')
-            obj.save()
+        
+        prog_ids = request.POST.getlist('program_id')
+        prog_titles = request.POST.getlist('program_title')
+        prog_descs = request.POST.getlist('program_desc')
+        
+        prog_forms = []
+        seen_titles = set()
+        programs_valid = True
+        
+        for i in range(len(prog_titles)):
+            p_id = prog_ids[i] if i < len(prog_ids) else ''
+            p_title = prog_titles[i].strip()
+            p_desc = prog_descs[i].strip() if i < len(prog_descs) else ''
             
-            hero_images = request.FILES.getlist('hero_images')
-            for img in hero_images:
-                HeroImage.objects.create(site_settings=settings_obj, image=img)
+            if not p_title and not p_desc and not p_id:
+                continue
                 
-            # Handle Academic Programs
-            prog_ids = request.POST.getlist('program_id')
-            prog_titles = request.POST.getlist('program_title')
-            prog_descs = request.POST.getlist('program_desc')
+            data = {'title': p_title, 'description': p_desc, 'order': i}
+            instance = None
+            if p_id:
+                try:
+                    instance = AcademicProgram.objects.get(id=p_id, site_settings=settings_obj)
+                except AcademicProgram.DoesNotExist:
+                    pass
+                
+            pform = AcademicProgramForm(data, instance=instance)
+            prog_forms.append(pform)
             
-            for i in range(len(prog_titles)):
-                p_id = prog_ids[i] if i < len(prog_ids) else ''
-                p_title = prog_titles[i].strip()
-                p_desc = prog_descs[i].strip() if i < len(prog_descs) else ''
+            if not pform.is_valid():
+                programs_valid = False
+            elif p_title.lower() in seen_titles:
+                pform.add_error('title', 'Duplicate title.')
+                programs_valid = False
+            else:
+                seen_titles.add(p_title.lower())
                 
-                if p_id:
-                    try:
-                        prog = AcademicProgram.objects.get(id=p_id, site_settings=settings_obj)
-                        prog.title = p_title
-                        prog.description = p_desc
-                        prog.order = i
-                        prog.save()
-                    except AcademicProgram.DoesNotExist:
-                        pass
-                elif p_title:
-                    # Create new
-                    AcademicProgram.objects.create(
-                        site_settings=settings_obj,
-                        title=p_title,
-                        description=p_desc,
-                        order=i
-                    )
+        if form.is_valid() and programs_valid:
+            form.save()
+            save_hero_images(settings_obj, request.FILES.getlist('hero_images'))
+            
+            for pform in prog_forms:
+                p = pform.save(commit=False)
+                p.site_settings = settings_obj
+                p.save()
                 
-            messages.success(request, '✅ Settings saved successfully!')
+            messages.success(request, 'Settings saved successfully!')
             return redirect(reverse('dashboard-settings') + f'?tab={active_tab}')
         else:
-            messages.error(request, '❌ Please fix the errors below.')
-            # Find the first error and switch to its tab
-            for field in form.errors:
-                if field in FIELD_TO_TAB:
-                    active_tab = FIELD_TO_TAB[field]
+            messages.error(request, 'Please fix the errors below.')
+            tab_errors = build_tab_errors(form, prog_forms)
+            for tab, err_count in tab_errors.items():
+                if err_count > 0:
+                    active_tab = tab
                     break
-                    
     else:
         form = SiteSettingsForm(instance=settings_obj)
+        prog_forms = [AcademicProgramForm(instance=p) for p in settings_obj.academic_programs.all()]
 
-    # Compute error counts per tab for the UI indicator
-    tab_errors = {tab: 0 for tab in ALLOWED_TABS}
-    if hasattr(form, 'errors') and form.errors:
-        for field in form.errors:
-            if field in FIELD_TO_TAB:
-                tab_errors[FIELD_TO_TAB[field]] += 1
-
-    if active_tab and active_tab.startswith('tab_'):
-        active_tab = active_tab[4:]
-    if active_tab not in ALLOWED_TABS:
-        active_tab = 'school'
-
-    programs = list(settings_obj.academic_programs.all())
-    # Always append one empty program slot for the UI
-    programs.append({'id': '', 'title': '', 'description': ''})
-
-    grouped_grades = [
-        ("Early Childhood", [g for g in ALL_GRADES if g in ['ECD', 'Nursery', 'LKG', 'UKG']]),
-        ("Primary", [g for g in ALL_GRADES if g in ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5']]),
-        ("Lower Secondary", [g for g in ALL_GRADES if g in ['Grade 6', 'Grade 7', 'Grade 8']]),
-        ("Secondary", [g for g in ALL_GRADES if g in ['Grade 9', 'Grade 10']]),
-        ("+2", [g for g in ALL_GRADES if g in ['Grade 11', 'Grade 12']]),
-    ]
+    tab_errors = build_tab_errors(form, prog_forms if request.method == 'POST' else None)
     
+    programs = []
+    if request.method == 'POST':
+        for pf in prog_forms:
+            programs.append({
+                'id': pf.instance.id,
+                'title': pf.data.get('title', ''),
+                'description': pf.data.get('description', ''),
+                'errors': pf.errors
+            })
+    else:
+        for p in settings_obj.academic_programs.all():
+            programs.append({
+                'id': p.id,
+                'title': p.title,
+                'description': p.description,
+            })
+            
     active_ticker_count = Notice.objects.filter(show_in_ticker=True).count()
     
     return render(request, 'core/dashboard_settings.html', {
         'form': form,
-        'all_grades': ALL_GRADES,
-        'grouped_grades': grouped_grades,
         'active_tab': active_tab,
         'tab_errors': tab_errors,
         'programs': programs,
+        'blank_program': {'id': '', 'title': '', 'description': ''},
         'active_ticker_count': min(5, active_ticker_count),
+        'all_grades': ALL_GRADES,
+        'grouped_grades': GROUPED_GRADES,
     })
 
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from .models import Testimonial
-from .forms import TestimonialForm
 
 class DashboardTestimonialListView(StaffRequiredMixin, ListView):
     model = Testimonial
@@ -334,7 +340,6 @@ class TestimonialDeleteView(StaffRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-from .forms import AdmissionStaffForm
 
 class DashboardAdmissionUpdateView(StaffRequiredMixin, UpdateView):
     model = AdmissionInquiry
@@ -347,7 +352,6 @@ class DashboardAdmissionUpdateView(StaffRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-from .models import ContactMessage
 
 class DashboardContactListView(StaffRequiredMixin, ListView):
     model = ContactMessage

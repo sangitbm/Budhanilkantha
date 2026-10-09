@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import AdmissionInquiry, SiteSettings, Testimonial, ContactMessage
+from .models import AdmissionInquiry, SiteSettings, Testimonial, ContactMessage, AcademicProgram
 
 
 class ContactMessageForm(forms.ModelForm):
@@ -15,6 +15,11 @@ class ContactMessageForm(forms.ModelForm):
             'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Subject'}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Your Message'}),
         }
+
+    def clean_open_grades(self):
+        from core.constants import ALL_GRADES
+        grades = self.cleaned_data.get('open_grades', [])
+        return [g for g in grades if g in ALL_GRADES]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -39,6 +44,15 @@ class AdmissionForm(forms.ModelForm):
             'grade_applying_for': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Grade 11'}),
         }
 
+
+class AcademicProgramForm(forms.ModelForm):
+    class Meta:
+        model = AcademicProgram
+        fields = ['id', 'title', 'description', 'order']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Day Shift (ECD - Grade 10)'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Brief description...'}),
+        }
 
 class SiteSettingsForm(forms.ModelForm):
     class Meta:

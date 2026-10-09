@@ -4,41 +4,7 @@
 {% block title %}Events - {{ site_settings.school_name }}{% endblock %}
 
 {% block content %}
-<style>
-  .calendar-placeholder {
-    background: var(--light-bg);
-    padding: 60px;
-    border-radius: var(--radius);
-    color: var(--text-muted);
-  }
-  
-  .placeholder-icon {
-    font-size: 3rem;
-    margin-bottom: 20px;
-  }
-  
-  .event-card {
-    padding: 24px;
-    border-left: 4px solid var(--primary);
-    background: white;
-    box-shadow: var(--shadow-sm);
-    border-radius: var(--radius-sm);
-  }
-  
-  .event-meta {
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    font-weight: 500;
-  }
-  
-  .tba-badge {
-    background: #ffecb3; 
-    padding: 2px 6px; 
-    border-radius: 4px; 
-    color: #f57f17; 
-    font-size: 0.85rem;
-  }
-</style>
+
 
 <section class="events section-padding">
   <div class="container text-center">
@@ -72,7 +38,7 @@
       {% else %}
         <div class="calendar-placeholder" style="text-align: center;">
           <div class="placeholder-icon">🗓️</div>
-          <h3>No Upcoming Events</h3>
+          <h3>Check back later for upcoming events.</h3>
           <p>There are no scheduled events at the moment. Please check back later!</p>
         </div>
       {% endif %}

@@ -1,12 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Admin Dashboard{% endblock %} - BSS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
     <style>
         body {
             background-color: var(--light-bg);
@@ -16,8 +18,7 @@
             font-family: var(--font);
             overflow-x: hidden;
         }
-        
-        /* Sidebar Styles */
+
         .sidebar {
             width: 280px;
             background: var(--primary-dark);
@@ -31,7 +32,7 @@
             z-index: 1000;
             transition: transform 0.3s ease;
         }
-        
+
         .sidebar-header {
             padding: 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -49,7 +50,7 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
-        
+
         .sidebar-menu {
             padding: 24px 0;
             flex-grow: 1;
@@ -58,7 +59,7 @@
             gap: 8px;
             overflow-y: auto;
         }
-        
+
         .sidebar-menu a {
             padding: 12px 24px;
             color: rgba(255, 255, 255, 0.7);
@@ -67,22 +68,23 @@
             gap: 12px;
             transition: var(--transition);
         }
-        
-        .sidebar-menu a:hover, .sidebar-menu a.active {
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
             background: rgba(255, 255, 255, 0.05);
             color: var(--white);
             border-left: 4px solid var(--accent);
         }
-        
+
         .sidebar-footer {
             padding: 24px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .sidebar-footer form {
             width: 100%;
         }
-        
+
         .sidebar-footer button {
             width: 100%;
             background: rgba(255, 255, 255, 0.1);
@@ -93,12 +95,11 @@
             cursor: pointer;
             transition: var(--transition);
         }
-        
+
         .sidebar-footer button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
 
-        /* Main Content Styles */
         .main-content {
             margin-left: 280px;
             flex-grow: 1;
@@ -140,7 +141,7 @@
             color: var(--text-dark);
             margin: 0;
         }
-        
+
         .card {
             background: var(--white);
             border-radius: var(--radius);
@@ -148,17 +149,19 @@
             padding: 24px;
             margin-bottom: 24px;
         }
-        
-        /* Table Styles */
+
         .table {
             width: 100%;
             border-collapse: collapse;
         }
-        .table th, .table td {
+
+        .table th,
+        .table td {
             padding: 16px;
             text-align: left;
             border-bottom: 1px solid var(--gray-light);
         }
+
         .table th {
             font-weight: 600;
             color: var(--text-muted);
@@ -166,36 +169,39 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        
+
         .action-btns {
             display: flex;
             gap: 8px;
         }
-        
+
         .btn-sm {
             padding: 6px 14px;
             font-size: 0.85rem;
         }
-        
+
         .btn-danger {
             background: #e74c3c;
             color: white;
         }
+
         .btn-danger:hover {
             background: #c0392b;
         }
 
-        /* Form Styles inside Dashboard */
         .form-group {
             margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--text-dark);
         }
-        .form-group input, .form-group textarea {
+
+        .form-group input,
+        .form-group textarea {
             width: 100%;
             padding: 12px 16px;
             border: 1px solid var(--gray-light);
@@ -203,13 +209,14 @@
             font-family: var(--font);
             transition: var(--transition);
         }
-        .form-group input:focus, .form-group textarea:focus {
+
+        .form-group input:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(26, 75, 140, 0.1);
         }
 
-        /* Overlay */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -217,62 +224,82 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
 
-        /* Responsive Styles */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
             }
+
             .sidebar.open {
                 transform: translateX(0);
             }
+
             .sidebar-overlay.open {
                 display: block;
             }
+
             .close-sidebar {
                 display: block;
             }
+
             .main-content {
                 margin-left: 0;
                 padding: 20px;
             }
+
             .mobile-toggle {
                 display: block;
             }
+
             .table {
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
             }
         }
-    
-        /* Accessibility & Usability Improvements */
-        a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
         }
-        
-        /* Alerts */
+
         .alert {
             padding: 16px;
             border-radius: var(--radius-sm);
             margin-bottom: 24px;
             font-weight: 500;
         }
-        .alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
-        .alert-error { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
-        .alert-info { background: #e3f2fd; color: #1565c0; border-left: 4px solid #1565c0; }
-        
-        /* Table Responsive container */
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #1565c0;
+        }
+
         .table-responsive {
             overflow-x: auto;
             width: 100%;
         }
-        
-        /* Badge Styles for consistency */
+
         .badge {
             display: inline-block;
             padding: 4px 10px;
@@ -283,11 +310,28 @@
             color: #1565c0;
             vertical-align: middle;
         }
-        .badge.badge-success { background: #e8f5e9; color: #2e7d32; }
-        .badge.badge-danger, .inactive-badge { background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; vertical-align: middle; }
-        .badge.badge-warning { background: #fff8e1; color: #f57f17; }
-        
-        /* Empty states */
+
+        .badge.badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.badge-danger,
+        .inactive-badge {
+            background: #ffebee;
+            color: #c62828;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+
+        .badge.badge-warning {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
         .empty-state {
             text-align: center;
             padding: 48px 24px;
@@ -297,82 +341,90 @@
             border: 2px dashed var(--gray-light);
             margin-bottom: 24px;
         }
+
         .empty-state-icon {
             font-size: 3rem;
             margin-bottom: 16px;
             opacity: 0.5;
             display: block;
         }
-
     </style>
 </head>
-<body>
 
-    <!-- Mobile Overlay -->
+<body>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar -->
     <aside class="sidebar" id="adminSidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center; gap: 12px;">
                 {% if site_settings.logo %}
-                    <img src="{{ site_settings.logo.url }}"
-                         alt="{{ site_settings.school_short_name }} Logo"
-                         style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);">
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.school_short_name }} Logo"
+                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);">
                 {% else %}
-                    <div class="logo-icon" style="width: 36px; height: 36px; font-size: 1rem;">
-                        {{ site_settings.school_short_name|slice:":1" }}
-                    </div>
+                <div class="logo-icon" style="width: 36px; height: 36px; font-size: 1rem;">
+                    {{ site_settings.school_short_name|slice:":1" }}
+                </div>
                 {% endif %}
+
                 <div style="font-weight: 700; font-size: 1.1rem; line-height: 1.2;">
                     {{ site_settings.school_short_name }} Admin
-                    <span style="display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7;">Dashboard</span>
+                    <span style="display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7;">
+                        Dashboard
+                    </span>
                 </div>
             </div>
-            <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+
+            <button class="close-sidebar" onclick="toggleSidebar()" aria-label="Close navigation">
+                ✕
+            </button>
         </div>
-        
-        <nav class="sidebar-menu">
+
+        <nav class="sidebar-menu" aria-label="Dashboard navigation">
             <a href="{% url 'dashboard' %}"
-               class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-               📊 Overview
+                class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                📊 Overview
             </a>
             <a href="{% url 'dashboard-notices' %}"
-               class="{% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
-               📢 Manage Notices
+                class="{% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
+                📢 Manage Notices
             </a>
-            <a href="{% url 'dashboard-events' %}" class="{% if 'event' in request.resolver_match.url_name %}active{% endif %}">
-               📅 Manage Events
+            <a href="{% url 'dashboard-events' %}"
+                class="{% if 'event' in request.resolver_match.url_name %}active{% endif %}">
+                📅 Manage Events
             </a>
-            <a href="{% url 'dashboard-messages' %}" class="{% if 'message' in request.resolver_match.url_name %}active{% endif %}">
-               📬 Contact Messages
+            <a href="{% url 'dashboard-messages' %}"
+                class="{% if 'message' in request.resolver_match.url_name %}active{% endif %}">
+                📬 Contact Messages
             </a>
             <a href="{% url 'dashboard-gallery' %}"
-               class="{% if 'gallery' in request.resolver_match.url_name or 'photo' in request.resolver_match.url_name %}active{% endif %}">
-               📸 Manage Gallery
+                class="{% if 'gallery' in request.resolver_match.url_name or 'photo' in request.resolver_match.url_name %}active{% endif %}">
+                📸 Manage Gallery
             </a>
             <a href="{% url 'dashboard-students' %}"
-               class="{% if 'student' in request.resolver_match.url_name %}active{% endif %}">
-               🎓 Manage Students
+                class="{% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+                🎓 Manage Students
             </a>
             <a href="{% url 'dashboard-staff' %}"
-               class="{% if 'staff' in request.resolver_match.url_name %}active{% endif %}">
-               💼 Manage Staff
+                class="{% if 'staff' in request.resolver_match.url_name %}active{% endif %}">
+                💼 Manage Staff
             </a>
             <a href="{% url 'dashboard-admissions' %}"
-               class="{% if 'admission' in request.resolver_match.url_name %}active{% endif %}">
-               📋 Manage Admissions
+                class="{% if 'admission' in request.resolver_match.url_name %}active{% endif %}">
+                📋 Manage Admissions
             </a>
-                    <a href="{% url 'dashboard-testimonials' %}" class="{% if request.resolver_match.url_name == 'dashboard-testimonials' or request.resolver_match.url_name == 'testimonial-add' or request.resolver_match.url_name == 'testimonial-edit' %}active{% endif %}">
-          💬 Manage Testimonials
-        </a>
-<a href="{% url 'dashboard-settings' %}"
-               class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
-               ⚙️ Site Settings
+            <a href="{% url 'dashboard-testimonials' %}"
+                class="{% if request.resolver_match.url_name == 'dashboard-testimonials' or request.resolver_match.url_name == 'testimonial-add' or request.resolver_match.url_name == 'testimonial-edit' %}active{% endif %}">
+                💬 Manage Testimonials
             </a>
-            <a href="{% url 'home' %}" target="_blank">🌐 View Site ↗</a>
+            <a href="{% url 'dashboard-settings' %}"
+                class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+                ⚙️ Site Settings
+            </a>
+            <a href="{% url 'home' %}" target="_blank" rel="noopener noreferrer">
+                🌐 View Site ↗
+            </a>
         </nav>
-        
+
         <div class="sidebar-footer">
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
@@ -381,22 +433,20 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
     <main class="main-content">
         <div class="dashboard-header">
             <div class="dashboard-title-wrapper">
-                <!-- Hamburger menu button -->
-                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+                <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Open navigation">
+                    ☰
+                </button>
                 <h1 class="dashboard-title">{% block page_title %}Dashboard{% endblock %}</h1>
             </div>
             {% block header_actions %}{% endblock %}
         </div>
-        
-        {% block content %}
-        {% endblock %}
+
+        {% block content %}{% endblock %}
     </main>
 
-    <!-- Javascript to handle opening and closing the menu -->
     <script>
         function toggleSidebar() {
             document.getElementById('adminSidebar').classList.toggle('open');
@@ -404,4 +454,5 @@
         }
     </script>
 </body>
+
 </html>

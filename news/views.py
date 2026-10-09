@@ -1,7 +1,5 @@
-from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from core.permissions import StaffRequiredMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .models import Notice
 from .forms import NoticeForm
