@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,16 +25,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fc9bxo%-lh&me+d_(*n!tz4g3k5g=j0^&5oh*!hsvowitj0qc%'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fc9bxo%-lh&me+d_(*n!tz4g3k5g=j0^&5oh*!hsvowitj0qc%')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'comics-liver-submitted-countries.trycloudflare.com',
-]
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host.strip()]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',') if origin.strip()]
+
+CSRF_COOKIE_NAME = 'bss_csrftoken'
+SESSION_COOKIE_NAME = 'bss_sessionid'
+
 
 
 # Application definition
@@ -142,6 +148,3 @@ MAILERS = {
 
 LOGIN_REDIRECT_URL = 'dashboard'
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://comics-liver-submitted-countries.trycloudflare.com',
-]
