@@ -29,6 +29,7 @@ class Staff(models.Model):
     email = models.EmailField()
     date_of_joining = models.DateField()
     is_active = models.BooleanField(default=True)
+    show_contact_publicly = models.BooleanField(default=False, help_text="Show phone number and email on the public staff directory")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.designation})"

@@ -49,6 +49,7 @@
                 <th>Type</th>
                 <th>Designation</th>
                 <th>Department</th>
+                <th>Public Contact</th>
                 <th class="actions-right">Actions</th>
             </tr>
         </thead>
@@ -64,6 +65,13 @@
                 <td>{{ staff.get_staff_type_display }}</td>
                 <td>{{ staff.designation }}</td>
                 <td>{{ staff.department }}</td>
+                <td>
+                    {% if staff.show_contact_publicly %}
+                    <span class="badge">Yes</span>
+                    {% else %}
+                    <span class="inactive-badge">No</span>
+                    {% endif %}
+                </td>
                 <td class="actions-right">
                     <div class="action-btns-right">
                         <a href="{% url 'edit-staff' staff.pk %}" class="btn btn-outline btn-sm">Edit</a>
@@ -73,7 +81,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" class="empty-table-cell">
+                <td colspan="6" class="empty-table-cell">
                     💼 No staff members have been added to the database yet.
                 </td>
             </tr>

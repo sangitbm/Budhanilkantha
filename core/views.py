@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, CreateView, ListView
+from core.permissions import StaffRequiredMixin, staff_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy, reverse
@@ -34,7 +35,7 @@ class AdmissionCreateView(CreateView):
     template_name = 'core/admission_form.html'
     success_url = reverse_lazy('home')
 
-class DashboardAdmissionListView(LoginRequiredMixin, ListView):
+class DashboardAdmissionListView(StaffRequiredMixin, ListView):
     model = AdmissionInquiry
     template_name = 'core/dashboard_admission_list.html'
     context_object_name = 'applications'  
@@ -54,7 +55,7 @@ def staff_directory_view(request):
     return render(request, 'core/staff_directory.html', context)
 
 
-@login_required(login_url='/admin/login/')
+@staff_required
 def dashboard_index_view(request):
     context = {
         'notices_count': Notice.objects.count(),
@@ -85,11 +86,8 @@ FIELD_TO_TAB = {
     'meta_description': 'advanced', 'og_title': 'advanced', 'og_image': 'advanced', 'maintenance_mode': 'advanced'
 }
 
-@login_required(login_url='/admin/login/')
+@staff_required
 def program_remove_view(request, pk):
-
-    if not request.user.is_staff:
-        return HttpResponseForbidden("Not allowed.")
     
     settings_obj = SiteSettings.get_settings()
     program = get_object_or_404(AcademicProgram, pk=pk, site_settings=settings_obj)
@@ -102,10 +100,8 @@ def program_remove_view(request, pk):
         
     return render(request, 'core/confirm_remove_program.html', {'program': program})
 
-@login_required(login_url='/admin/login/')
+@staff_required
 def dashboard_settings_view(request):
-    if not request.user.is_staff:
-        return HttpResponseForbidden("Not allowed.")
         
     settings_obj = SiteSettings.get_settings()
     active_tab = request.GET.get('tab', 'school')
@@ -131,8 +127,6 @@ def dashboard_settings_view(request):
         # Handle Academic Program deletion redirect
         delete_prog_id = request.POST.get('delete_program_id')
         if delete_prog_id:
-            if not request.user.is_staff:
-                return HttpResponseForbidden("Not allowed.")
             return redirect('program-remove', pk=delete_prog_id)
 
         form = SiteSettingsForm(request.POST, request.FILES, instance=settings_obj)
@@ -224,13 +218,8 @@ def dashboard_settings_view(request):
 
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import UserPassesTestMixin
 from .models import Testimonial
 from .forms import TestimonialForm
-
-class StaffRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_staff
 
 class DashboardTestimonialListView(StaffRequiredMixin, ListView):
     model = Testimonial

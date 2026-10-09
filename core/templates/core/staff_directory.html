@@ -130,8 +130,10 @@
                     <td class="text-dark">{{ staff.designation }}</td>
                     <td class="text-muted">{{ staff.department }}</td>
                     <td>
+                        {% if staff.show_contact_publicly %}
                         <div class="contact-phone">📞 {{ staff.contact_number }}</div>
                         <div class="contact-email">✉️ {{ staff.email }}</div>
+                        {% endif %}
                     </td>
                 </tr>
                 

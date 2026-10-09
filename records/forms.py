@@ -12,7 +12,7 @@ class StudentForm(forms.ModelForm):
 class StaffForm(forms.ModelForm):
     class Meta:
         model = Staff
-        fields = ['first_name', 'last_name', 'staff_type', 'designation', 'department', 'email', 'contact_number', 'date_of_joining', 'is_active']
+        fields = ['first_name', 'last_name', 'staff_type', 'designation', 'department', 'email', 'contact_number', 'date_of_joining', 'is_active', 'show_contact_publicly']
         widgets = {
             'date_of_joining': forms.DateInput(attrs={'type': 'date'}),
         }
