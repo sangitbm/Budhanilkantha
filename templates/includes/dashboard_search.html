@@ -1,0 +1,18 @@
+<div class="dl-toolbar">
+  <form method="get" class="dl-search-form">
+    <label for="id_search" class="dl-sr-only">Search</label>
+    <div class="dl-search-input-wrapper">
+      {% include 'includes/icon.html' with name='search' class="dl-search-icon" %}
+      <input type="search" name="q" id="id_search" class="dl-search-input" value="{{ q }}" placeholder="{{ placeholder|default:'Search...' }}">
+    </div>
+    <button type="submit" class="btn btn-primary dl-search-btn">Search</button>
+    {% if q %}
+    <a href="?" class="dl-search-clear">Clear</a>
+    {% endif %}
+  </form>
+  {% if q %}
+  <div class="dl-search-count">
+    Found {{ count }} {{ noun|default:'items' }}
+  </div>
+  {% endif %}
+</div>

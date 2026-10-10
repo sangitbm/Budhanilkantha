@@ -1,7 +1,0 @@
-{% if record_type == 'Student' %}
-{% url 'dashboard-students' as cancel_url %}
-{% include 'includes/dashboard_delete_shell.html' with object_type="Student" cancel_url=cancel_url cancel_url_name="Students" %}
-{% else %}
-{% url 'dashboard-staff' as cancel_url %}
-{% include 'includes/dashboard_delete_shell.html' with object_type="Staff" cancel_url=cancel_url cancel_url_name="Staff" %}
-{% endif %}

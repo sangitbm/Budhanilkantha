@@ -1,87 +1,112 @@
 {% extends 'core/dashboard_base.html' %}
+{% load ui %}
 
+{% block title %}Manage Students{% endblock %}
 {% block page_title %}Manage Students{% endblock %}
 
 {% block header_actions %}
-  <a href="{% url 'add-student' %}" class="btn btn-primary">+ Add New Student</a>
+<a href="{% url 'add-student' %}" class="btn btn-primary">
+  {% include 'includes/icon.html' with name='plus' %} Add New Student
+</a>
 {% endblock %}
 
 {% block content %}
-<style>
-  .student-name-cell {
-    font-weight: 500;
-    color: var(--text-dark);
-  }
-
-  .actions-right {
-    text-align: right;
-  }
-
-  .action-btns-right {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .empty-table-cell {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-muted);
-  }
-</style>
-
-<div class="card">
-    <div class="table-responsive">
-    <table class="table">
-        <thead>
-            <tr>
-                <th style="width: 54px;">Photo</th>
-                <th>Name</th>
-                <th>Gender</th>
-                <th>Grade</th>
-                <th>Roll No</th>
-                <th>Contact</th>
-                <th class="actions-right">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in students %}
-            <tr>
-                <td>
-                    {% if student.photo %}
-                    <img src="{{ student.photo.url }}" alt="{{ student.first_name }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; display: block;">
-                    {% else %}
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; border: 1px solid #bfdbfe;">
-                        {{ student.first_name|slice:":1" }}{{ student.last_name|slice:":1" }}
-                    </div>
-                    {% endif %}
-                </td>
-                <td class="student-name-cell">{{ student.first_name }} {{ student.last_name }}</td>
-                <td><span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; background: #f1f5f9; color: #475569;">{{ student.gender|default:"Not specified" }}</span></td>
-                <td><span style="font-weight: 500; color: #0f172a;">{{ student.grade }}</span></td>
-                <td><code>{{ student.roll_number }}</code></td>
-                <td>{{ student.contact_number }}</td>
-                <td class="actions-right">
-                    <div class="action-btns-right">
-                        <a href="{% url 'edit-student' student.pk %}" class="btn btn-outline btn-sm">Edit</a>
-                        <a href="{% url 'delete-student' student.pk %}" class="btn btn-danger btn-sm">Delete</a>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="100">
-    <div class="empty-state">
-        <span class="empty-state-icon">📁</span>
-        <p>
-                    🎓 No students have been added to the database yet.
-                </p>
+<div class="dl-toolbar">
+  <form method="get" class="dl-search-form">
+    <label for="id_search" class="dl-sr-only">Search</label>
+    <div class="dl-search-input-wrapper">
+      {% include 'includes/icon.html' with name='search' class="dl-search-icon" %}
+      <input type="search" name="q" id="id_search" class="dl-search-input" value="{{ q }}" placeholder="Search students...">
     </div>
-</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    <label for="id_grade" class="dl-sr-only">Grade</label>
+    <select name="grade" id="id_grade" class="dl-search-input">
+      <option value="">All grades</option>
+      {% for grade_val, grade_label in grade_choices %}
+      <option value="{{ grade_val }}" {% if grade == grade_val %}selected{% endif %}>{{ grade_label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary dl-search-btn">Search</button>
+    {% if q or grade %}
+    <a href="?" class="dl-search-clear">Clear</a>
+    {% endif %}
+  </form>
+  <div class="dl-toolbar-actions">
+    {% if total > 0 %}
+    <span class="dl-search-count">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ total }} students</span>
+    {% endif %}
+    <a href="{% url 'students-export' %}?q={{ q|urlencode }}&grade={{ grade|urlencode }}" class="btn btn-outline dl-export-btn">
+       {% include 'includes/icon.html' with name='download' %} Export CSV
+    </a>
+  </div>
+</div>
+
+{% if students or q or grade %}
+  {% if students %}
+  <div class="dl-card">
+    <table class="dl-table">
+      <caption class="dl-sr-only">Students</caption>
+      <thead>
+        <tr>
+          <th scope="col">Student</th>
+          <th scope="col" class="dl-cell-grade">Grade</th>
+          <th scope="col" class="dl-cell-gender">Gender</th>
+          <th scope="col">Guardian</th>
+          <th scope="col" class="dl-cell-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td data-label="Student">
+            <div class="dl-cell-student">
+              {% if student.photo %}
+              <img src="{{ student.photo.url }}" alt="" loading="lazy" class="dl-avatar">
+              {% else %}
+              <div class="dl-avatar-initials">
+                  {{ student.first_name|slice:":1" }}{{ student.last_name|slice:":1" }}
+              </div>
+              {% endif %}
+              <div class="dl-student-meta">
+                <a href="{% url 'edit-student' student.pk %}" class="dl-student-name">{{ student.first_name }} {{ student.last_name }}</a>
+                <span class="dl-student-roll">Roll {{ student.roll_number }}</span>
+              </div>
+            </div>
+          </td>
+          <td data-label="Grade" class="dl-cell-grade">
+            {{ student.get_grade_display }}
+          </td>
+          <td data-label="Gender" class="dl-cell-gender">
+            {{ student.gender }}
+          </td>
+          <td data-label="Guardian" class="dl-cell-guardian">
+            <span class="dl-guardian-name">{{ student.guardian_name }}</span>
+            <a href="tel:{{ student.contact_number }}" class="dl-guardian-phone">{{ student.contact_number }}</a>
+          </td>
+          <td data-label="Actions" class="dl-cell-actions">
+            <div class="dl-actions">
+              <a href="{% url 'edit-student' student.pk %}" class="dl-btn-icon dl-btn-edit" aria-label="Edit '{{ student.first_name|escapejs }} {{ student.last_name|escapejs }}'">
+                {% include 'includes/icon.html' with name='edit' %} Edit
+              </a>
+              <a href="{% url 'delete-student' student.pk %}" class="dl-btn-icon dl-btn-delete" aria-label="Delete '{{ student.first_name|escapejs }} {{ student.last_name|escapejs }}'">
+                {% include 'includes/icon.html' with name='trash' %} Delete
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
-</div>
-</div>
+  </div>
+  
+  {% include 'includes/pagination.html' %}
+  
+  {% else %}
+  <div class="dl-empty dl-search-empty">
+    <p class="dl-empty-text">No students match your search</p>
+    <a href="?" class="btn btn-outline">Clear filters</a>
+  </div>
+  {% endif %}
+{% else %}
+  {% include 'includes/dashboard_empty_state.html' with title="No students yet" text="Add students to keep their grade, roll number and guardian contact in one place." action_url="/records/dashboard/students/add/" action_label="Add your first student" %}
+{% endif %}
 {% endblock %}

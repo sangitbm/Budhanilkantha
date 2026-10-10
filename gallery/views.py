@@ -1,6 +1,7 @@
 from .models import Photo
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from core.permissions import StaffRequiredMixin
+from core.mixins import DashboardDeleteMixin
 from django.urls import reverse_lazy
 from .forms import PhotoForm
 
@@ -36,7 +37,15 @@ class PhotoUpdateView(StaffRequiredMixin, UpdateView):
     template_name = 'gallery/photo_form.html'
     success_url = reverse_lazy('dashboard-gallery')
 
-class PhotoDeleteView(StaffRequiredMixin, DeleteView):
+class PhotoDeleteView(DashboardDeleteMixin, DeleteView):
     model = Photo
-    template_name = 'gallery/photo_confirm_delete.html'
     success_url = reverse_lazy('dashboard-gallery')
+    object_type = 'photo'
+    list_url_name = 'dashboard-gallery'
+    list_label = 'Photos'
+    impact = 'It will be removed from the gallery and from the home page.'
+
+    def get_details(self, obj):
+        return [
+            ('Title', obj.title if obj.title else 'Untitled')
+        ]

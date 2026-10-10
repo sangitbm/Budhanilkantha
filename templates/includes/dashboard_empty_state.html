@@ -1,0 +1,12 @@
+<div class="dl-empty">
+  <div class="dl-empty-icon">
+    {% include 'includes/icon.html' with name='megaphone' %}
+  </div>
+  <h3 class="dl-empty-title">{{ title }}</h3>
+  <p class="dl-empty-text">{{ text }}</p>
+  {% if action_url and action_label %}
+  <a href="{{ action_url }}" class="btn btn-primary dl-empty-action">
+    {% include 'includes/icon.html' with name='plus' %} {{ action_label }}
+  </a>
+  {% endif %}
+</div>

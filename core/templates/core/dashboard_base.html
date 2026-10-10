@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard_lists.css' %}">
     <style>
         body {
             background-color: var(--light-bg);
@@ -67,13 +68,23 @@
             align-items: center;
             gap: 12px;
             transition: var(--transition);
+            position: relative;
         }
 
         .sidebar-menu a:hover,
         .sidebar-menu a.active {
             background: rgba(255, 255, 255, 0.05);
             color: var(--white);
-            border-left: 4px solid var(--accent);
+        }
+        
+        .sidebar-menu a.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent);
         }
 
         .sidebar-footer {
@@ -382,53 +393,55 @@
         <nav class="sidebar-menu" aria-label="Dashboard navigation">
             <a href="{% url 'dashboard' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                📊 Overview
+                {% include 'includes/icon.html' with name='bar-chart' class='sidebar-icon' %} Overview
             </a>
             <a href="{% url 'dashboard-notices' %}"
                 class="{% if 'notice' in request.resolver_match.url_name %}active{% endif %}">
-                📢 Manage Notices
+                {% include 'includes/icon.html' with name='megaphone' class='sidebar-icon' %} Manage Notices
             </a>
             <a href="{% url 'dashboard-events' %}"
                 class="{% if 'event' in request.resolver_match.url_name %}active{% endif %}">
-                📅 Manage Events
+                {% include 'includes/icon.html' with name='calendar' class='sidebar-icon' %} Manage Events
             </a>
             <a href="{% url 'dashboard-messages' %}"
                 class="{% if 'message' in request.resolver_match.url_name %}active{% endif %}">
-                📬 Contact Messages
+                {% include 'includes/icon.html' with name='mail' class='sidebar-icon' %} Contact Messages
             </a>
             <a href="{% url 'dashboard-gallery' %}"
                 class="{% if 'gallery' in request.resolver_match.url_name or 'photo' in request.resolver_match.url_name %}active{% endif %}">
-                📸 Manage Gallery
+                {% include 'includes/icon.html' with name='image' class='sidebar-icon' %} Manage Gallery
             </a>
             <a href="{% url 'dashboard-students' %}"
                 class="{% if 'student' in request.resolver_match.url_name %}active{% endif %}">
-                🎓 Manage Students
+                {% include 'includes/icon.html' with name='users' class='sidebar-icon' %} Manage Students
             </a>
             <a href="{% url 'dashboard-staff' %}"
                 class="{% if 'staff' in request.resolver_match.url_name %}active{% endif %}">
-                💼 Manage Staff
+                {% include 'includes/icon.html' with name='briefcase' class='sidebar-icon' %} Manage Staff
             </a>
             <a href="{% url 'dashboard-admissions' %}"
                 class="{% if 'admission' in request.resolver_match.url_name %}active{% endif %}">
-                📋 Manage Admissions
+                {% include 'includes/icon.html' with name='clipboard' class='sidebar-icon' %} Manage Admissions
             </a>
             <a href="{% url 'dashboard-testimonials' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard-testimonials' or request.resolver_match.url_name == 'testimonial-add' or request.resolver_match.url_name == 'testimonial-edit' %}active{% endif %}">
-                💬 Manage Testimonials
+                {% include 'includes/icon.html' with name='message-circle' class='sidebar-icon' %} Manage Testimonials
             </a>
             <a href="{% url 'dashboard-settings' %}"
                 class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
-                ⚙️ Site Settings
+                {% include 'includes/icon.html' with name='settings' class='sidebar-icon' %} Site Settings
             </a>
             <a href="{% url 'home' %}" target="_blank" rel="noopener noreferrer">
-                🌐 View Site ↗
+                {% include 'includes/icon.html' with name='globe' class='sidebar-icon' %} View Site ↗
             </a>
         </nav>
 
         <div class="sidebar-footer">
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <button type="submit">🚪 Logout</button>
+                <button type="submit" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    {% include 'includes/icon.html' with name='log-out' class='sidebar-icon' %} Logout
+                </button>
             </form>
         </div>
     </aside>

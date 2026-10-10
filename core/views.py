@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render, redirect
 from core.permissions import StaffRequiredMixin, staff_required
+from core.mixins import DashboardDeleteMixin
 from django.contrib import messages
 from news.models import Notice, Event
 from gallery.models import Photo
@@ -10,7 +11,7 @@ from records.models import Student, Staff
 from .models import AdmissionInquiry, SiteSettings, HeroImage, AcademicProgram
 from .forms import AdmissionForm, SiteSettingsForm
 from .forms import ContactMessageForm
-from django.db.models import Q
+from django.db.models import Q, F
 from django.shortcuts import get_object_or_404
 from .forms import AcademicProgramForm
 from core.constants import ALLOWED_TABS, ALL_GRADES, FIELD_TO_TAB, GROUPED_GRADES
@@ -48,16 +49,17 @@ class EventsView(ListView):
     context_object_name = 'events'
     
     def get_queryset(self):
-        from django.utils import timezone
-        from django.db.models import Q
-        today = timezone.now().date()
-        return Event.objects.filter(Q(event_date__gte=today) | Q(event_date__isnull=True)).order_by('event_date', 'start_time')
+        today = timezone.localdate()
+        return Event.objects.filter(Q(event_date__gte=today) | Q(event_date__isnull=True)).order_by(
+            F('event_date').asc(nulls_last=True), 
+            F('start_time').asc(nulls_last=True), 
+            'title'
+        )
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from django.utils import timezone
-        today = timezone.now().date()
-        context['past_events'] = Event.objects.filter(event_date__lt=today).order_by('-event_date', '-start_time')
+        today = timezone.localdate()
+        context['past_events'] = Event.objects.filter(event_date__lt=today).order_by('-event_date', '-start_time')[:10]
         return context
 
 
@@ -184,10 +186,18 @@ def program_remove_view(request, pk):
     if request.method == 'POST':
         title = program.title
         program.delete()
-        messages.success(request, f"Program '{title}' removed.")
+        messages.success(request, f'Program "{title}" was deleted.')
         return redirect(reverse('dashboard-settings') + '?tab=programs')
         
-    return render(request, 'core/confirm_remove_program.html', {'program': program})
+    context = {
+        'object_type': 'program',
+        'object_label': program.title,
+        'details': [('Title', program.title)],
+        'impact': 'It will be removed from the Programs section of the home page.',
+        'cancel_url': reverse('dashboard-settings') + '?tab=programs',
+        'cancel_label': 'Settings',
+    }
+    return render(request, 'includes/dashboard_delete_shell.html', context)
 
 @staff_required
 def dashboard_settings_view(request):
@@ -333,14 +343,22 @@ class TestimonialUpdateView(StaffRequiredMixin, UpdateView):
         messages.success(self.request, "Testimonial updated successfully.")
         return super().form_valid(form)
 
-class TestimonialDeleteView(StaffRequiredMixin, DeleteView):
+class TestimonialDeleteView(DashboardDeleteMixin, DeleteView):
     model = Testimonial
-    template_name = 'core/testimonial_confirm_delete.html'
     success_url = reverse_lazy('dashboard-testimonials')
+    object_type = 'testimonial'
+    list_url_name = 'dashboard-testimonials'
+    list_label = 'Testimonials'
+    impact = 'It will be removed from the home page.'
 
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "Testimonial deleted.")
-        return super().delete(request, *args, **kwargs)
+    def get_details(self, obj):
+        q = obj.quote
+        if len(q) > 120:
+            q = q[:117] + '...'
+        return [
+            ('Quote', f'"{q}"'),
+            ('By', f'{obj.name} ({obj.role})'),
+        ]
 
 
 

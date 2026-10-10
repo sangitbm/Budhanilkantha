@@ -1,100 +1,92 @@
 {% extends 'core/dashboard_base.html' %}
+{% load ui %}
 
+{% block title %}Manage Notices{% endblock %}
 {% block page_title %}Manage Notices{% endblock %}
 
 {% block header_actions %}
-  <a href="{% url 'add-notice' %}" class="btn btn-primary">+ Add New Notice</a>
+<a href="{% url 'add-notice' %}" class="btn btn-primary">
+  {% include 'includes/icon.html' with name='plus' %} Add New Notice
+</a>
 {% endblock %}
 
 {% block content %}
-<style>
-  .notice-title-cell {
-    font-weight: 500;
-    color: var(--text-dark);
-  }
+<p class="dl-subtitle">Notices appear on the public Notices page. Notices marked for the ticker also scroll in the bar at the top of the site.</p>
 
-  .notice-link {
-    color: var(--primary);
-    text-decoration: none;
-  }
+{% include 'includes/dashboard_search.html' with q=q count=match_count noun='notices' placeholder='Search notices...' %}
 
-  .notice-link:hover {
-    text-decoration: underline;
-  }
-
-  .no-attachment {
-    color: var(--text-muted);
-  }
-
-  .actions-right {
-    text-align: right;
-  }
-
-  .action-btns-right {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .empty-table-cell {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-muted);
-  }
-</style>
-
-<div class="card">
-    <div class="table-responsive">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Date Posted</th>
-                <th>Ticker</th>
-                <th>Attachment</th>
-                <th class="actions-right">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for notice in notices %}
-            <tr>
-                <td class="notice-title-cell">{{ notice.title }}</td>
-                <td>{{ notice.created_at|date:"M d, Y" }}</td>
-                <td>
-                    {% if notice.show_in_ticker %}
-                    <span style="color: #10b981; font-weight: bold;">✓ Yes</span>
-                    {% else %}
-                    <span style="color: #ef4444;">✗ No</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if notice.file_attachment %}
-                    <a href="{{ notice.file_attachment.url }}" target="_blank" class="notice-link">📄 View</a>
-                    {% else %}
-                    <span class="no-attachment">—</span>
-                    {% endif %}
-                </td>
-                <td class="actions-right">
-                    <div class="action-btns-right">
-                        <a href="{% url 'edit-notice' notice.pk %}" class="btn btn-outline btn-sm">Edit</a>
-                        <a href="{% url 'delete-notice' notice.pk %}" class="btn btn-danger btn-sm">Delete</a>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="100">
-    <div class="empty-state">
-        <span class="empty-state-icon">📁</span>
-        <p>
-                    📢 No notices have been added yet.
-                </p>
-    </div>
-</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+{% if notices or q %}
+  {% if notices %}
+  <div class="dl-card">
+    <table class="dl-table">
+      <caption class="dl-sr-only">Notices</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="dl-cell-title">Title</th>
+          <th scope="col" class="dl-cell-date">Posted</th>
+          <th scope="col" class="dl-cell-ticker">Ticker</th>
+          <th scope="col" class="dl-cell-attach">Attachment</th>
+          <th scope="col" class="dl-cell-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for notice in notices %}
+        <tr>
+          <td data-label="Title" class="dl-cell-title">
+            <h4 class="dl-title-text">{{ notice.title }}</h4>
+            <p class="dl-title-excerpt">{{ notice.description|truncatechars:90 }}</p>
+          </td>
+          <td data-label="Posted" class="dl-cell-date" title="{{ notice.created_at|date:'F j, Y, g:i a' }}">
+            {{ notice.created_at|date:"M j, Y" }}
+          </td>
+          <td data-label="Ticker" class="dl-cell-ticker">
+            <form action="{% url 'toggle-notice-ticker' notice.pk %}" method="post" class="dl-ticker-form">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              {% if notice.show_in_ticker %}
+              <button type="submit" class="dl-ticker-btn dl-ticker-btn--on" aria-label="Hide '{{ notice.title|escapejs }}' from the ticker">On ticker</button>
+              {% else %}
+              <button type="submit" class="dl-ticker-btn dl-ticker-btn--off" aria-label="Show '{{ notice.title|escapejs }}' on the ticker">Hidden</button>
+              {% endif %}
+            </form>
+          </td>
+          <td data-label="Attachment" class="dl-cell-attach">
+            {% if notice.file_attachment %}
+            <a href="{{ notice.file_attachment.url }}" class="dl-attach-link" target="_blank" rel="noopener noreferrer">
+              {% include 'includes/icon.html' with name='file' %}
+              {% with ext=notice.file_attachment|file_ext %}
+                {{ ext|default:'FILE' }}
+              {% endwith %}
+            </a>
+            {% else %}
+            <span class="dl-attach-none">None</span>
+            {% endif %}
+          </td>
+          <td data-label="Actions" class="dl-cell-actions">
+            <div class="dl-actions">
+              <a href="{% url 'edit-notice' notice.pk %}" class="dl-btn-icon dl-btn-edit" aria-label="Edit '{{ notice.title|escapejs }}'">
+                {% include 'includes/icon.html' with name='edit' %} Edit
+              </a>
+              <a href="{% url 'delete-notice' notice.pk %}" class="dl-btn-icon dl-btn-delete" aria-label="Delete '{{ notice.title|escapejs }}'">
+                {% include 'includes/icon.html' with name='trash' %} Delete
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
-</div>
-</div>
+  </div>
+  
+  {% include 'includes/pagination.html' %}
+  
+  {% else %}
+  <div class="dl-empty dl-search-empty">
+    <p class="dl-empty-text">No notices match '{{ q }}'</p>
+    <a href="?" class="btn btn-outline">Clear search</a>
+  </div>
+  {% endif %}
+{% else %}
+  {% include 'includes/dashboard_empty_state.html' with title="No notices yet" text="Notices you add here appear on the public Notices page and, if you choose, in the scrolling bar at the top of the site." action_url="/dashboard/notices/add/" action_label="Add your first notice" %}
+{% endif %}
 {% endblock %}

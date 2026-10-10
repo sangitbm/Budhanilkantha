@@ -1521,39 +1521,6 @@ input, select, textarea, button {
   padding: 0;
 }
 
-.calendar-placeholder {
-    background: var(--light-bg);
-    padding: 60px;
-    border-radius: var(--radius);
-    color: var(--text-muted);
-}
-
-.placeholder-icon {
-    font-size: 3rem;
-    margin-bottom: 20px;
-}
-
-.event-card {
-    padding: 24px;
-    border-left: 4px solid var(--primary);
-    background: white;
-    box-shadow: var(--shadow-sm);
-    border-radius: var(--radius-sm);
-}
-
-.event-meta {
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    font-weight: 500;
-}
-
-.tba-badge {
-    background: #ffecb3; 
-    padding: 2px 6px; 
-    border-radius: 4px; 
-    color: #f57f17; 
-    font-size: 0.85rem;
-}
 
 .text-primary-color {
     color: var(--primary);

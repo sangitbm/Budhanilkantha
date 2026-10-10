@@ -28,3 +28,11 @@ def basename(value):
     if not value:
         return ''
     return str(value).split('/')[-1]
+
+@register.filter
+def file_ext(value):
+    import os
+    if not value:
+        return ''
+    ext = os.path.splitext(str(value))[1]
+    return ext.strip('.').upper() if ext else ''
