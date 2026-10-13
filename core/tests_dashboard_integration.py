@@ -2,14 +2,12 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.utils import timezone
 from django.core.cache import cache
 from datetime import timedelta, date, time
 
-from core.models import SiteSettings, Testimonial, ContactMessage, AdmissionInquiry
+from core.models import SiteSettings, Testimonial
 from news.models import Notice, Event
 from gallery.models import Photo
-from records.models import Student, Staff
 
 User = get_user_model()
 
@@ -37,7 +35,7 @@ class DashboardToHomepageIntegrationTests(TestCase):
 
     def test_notice_dashboard_creation_reflected_in_ticker_and_homepage(self):
         """Creating a notice with show_in_ticker=True reflects on public homepage ticker."""
-        notice = Notice.objects.create(
+        Notice.objects.create(
             title="Winter Vacation Announced",
             description="School remains closed next week.",
             show_in_ticker=True
@@ -48,14 +46,14 @@ class DashboardToHomepageIntegrationTests(TestCase):
 
     def test_testimonial_dashboard_creation_reflected_on_homepage(self):
         """Published testimonials created in dashboard appear in homepage Student Voices section."""
-        t1 = Testimonial.objects.create(
+        Testimonial.objects.create(
             name="Suman Thapa",
             role="Alumnus 2024",
             quote="Budhanilkantha shaped my career in engineering.",
             is_published=True,
             order=1
         )
-        t_hidden = Testimonial.objects.create(
+        Testimonial.objects.create(
             name="Hidden Reviewer",
             role="Parent",
             quote="This should not be displayed on homepage.",
@@ -71,7 +69,7 @@ class DashboardToHomepageIntegrationTests(TestCase):
     def test_event_dashboard_creation_reflected_in_events_page(self):
         """Upcoming events scheduled in dashboard appear with proper date/time on /events/."""
         tomorrow = date.today() + timedelta(days=1)
-        event = Event.objects.create(
+        Event.objects.create(
             title="Annual Sports Gala",
             description="Track and field competitions.",
             event_date=tomorrow,
@@ -87,7 +85,7 @@ class DashboardToHomepageIntegrationTests(TestCase):
     def test_gallery_photo_dashboard_creation_reflected_in_public_gallery(self):
         """Photos added via dashboard appear on public gallery page."""
         dummy_img = SimpleUploadedFile("test.jpg", b"\x47\x49\x46\x38\x39\x61\x01\x00\x01", content_type="image/jpeg")
-        photo = Photo.objects.create(
+        Photo.objects.create(
             title="Robotics Exhibition",
             description="Students demonstrating AI models.",
             image=dummy_img,

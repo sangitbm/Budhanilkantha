@@ -1,7 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from news.models import Notice
 
 class NoticeDashboardTests(TestCase):

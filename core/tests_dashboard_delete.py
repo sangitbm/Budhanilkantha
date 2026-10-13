@@ -3,12 +3,11 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import tempfile
-import shutil
 
 from news.models import Notice, Event
 from gallery.models import Photo
 from records.models import Student, Staff
-from core.models import Testimonial, AcademicProgram, SiteSettings, HeroImage
+from core.models import Testimonial, AcademicProgram, SiteSettings
 import os
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp()

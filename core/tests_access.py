@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from core.models import SiteSettings, AcademicProgram, Testimonial, AdmissionInquiry
+from core.models import SiteSettings, AcademicProgram, Testimonial
 from news.models import Notice
 from gallery.models import Photo
 from records.models import Student, Staff
