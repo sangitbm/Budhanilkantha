@@ -36,3 +36,24 @@ def file_ext(value):
         return ''
     ext = os.path.splitext(str(value))[1]
     return ext.strip('.').upper() if ext else ''
+
+@register.filter
+def bs_date(value, fmt="default"):
+    if value is None:
+        return ""
+    import datetime
+    import nepali_datetime
+
+    if isinstance(value, datetime.datetime):
+        value = value.date()
+    elif not isinstance(value, datetime.date):
+        return ""
+
+    try:
+        bs = nepali_datetime.date.from_datetime_date(value)
+    except (ValueError, OverflowError, Exception):
+        return ""
+
+    if fmt == "iso":
+        return bs.strftime("%Y-%m-%d")
+    return f"{bs.year} {bs.strftime('%B')} {bs.day}"

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'news',
     'gallery',
     'records',
+    'academics',
 ]
 
 MIDDLEWARE = [
@@ -85,6 +86,7 @@ TEMPLATES = [
                     'django.contrib.messages.context_processors.messages',
                     'core.context_processors.site_settings',
                     'core.context_processors.latest_notices',
+                    'academics.context_processors.current_session',
                 ],
         },
     },
@@ -128,7 +130,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kathmandu'
 
 USE_I18N = True
 
