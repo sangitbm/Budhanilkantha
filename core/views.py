@@ -360,6 +360,9 @@ class TestimonialDeleteView(DashboardDeleteMixin, DeleteView):
             ('By', f'{obj.name} ({obj.role})'),
         ]
 
+    def get_thumbnail_url(self, obj):
+        return obj.photo.url if obj.photo else None
+
 
 
 class DashboardAdmissionUpdateView(StaffRequiredMixin, UpdateView):

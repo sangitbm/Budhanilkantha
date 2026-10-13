@@ -141,7 +141,7 @@ class StudentDeleteView(DashboardDeleteMixin, DeleteView):
     object_type = 'student'
     list_url_name = 'dashboard-students'
     list_label = 'Students'
-    impact = "This student's record and photo are permanently deleted."
+    impact = "This student's record is permanently deleted."
 
     def get_details(self, obj):
         details = [
@@ -149,9 +149,10 @@ class StudentDeleteView(DashboardDeleteMixin, DeleteView):
             ('Roll Number', obj.roll_number),
             ('Guardian', obj.guardian_name),
         ]
-        if obj.photo:
-            details.append(('__thumbnail__', obj.photo.url))
         return details
+
+    def get_thumbnail_url(self, obj):
+        return obj.photo.url if obj.photo else None
 
 
 # --- Staff Views ---

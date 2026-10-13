@@ -51,7 +51,7 @@ class AcademicProgramDeletionTests(TestCase):
         response = self.client.get(self.remove_url)
         
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/confirm_remove_program.html')
+        self.assertTemplateUsed(response, 'includes/dashboard_delete_shell.html')
         self.assertTrue(AcademicProgram.objects.filter(id=self.prog1.id).exists())
 
     def test_post_deletes_program(self):

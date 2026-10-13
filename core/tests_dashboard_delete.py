@@ -54,7 +54,9 @@ class DashboardDeleteTests(TransactionTestCase):
         self.assertNotIn('style="', main_content)
         self.assertNotIn("javascript:", main_content)
         
-        self.assertContains(resp, "autofocus")
+        self.assertEqual(content.count("autofocus"), 1)
+        self.assertRegex(content, r'<a[^>]*href="[^"]*"[^>]*class="del-btn del-btn-cancel"[^>]*autofocus[^>]*>')
+        self.assertContains(resp, 'href="/dashboard/"')
 
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 302)
@@ -65,7 +67,16 @@ class DashboardDeleteTests(TransactionTestCase):
         
     def test_event_delete(self):
         e = Event.objects.create(title="Test Event")
-        self.check_delete_view(reverse('delete-event', args=[e.pk]), "event", "Test Event")
+        url = reverse('delete-event', args=[e.pk])
+        self.client.login(username='staff', password='pwd')
+        resp = self.client.get(url)
+        self.assertNotContains(resp, 'The attached file will also be deleted.')
+        self.check_delete_view(url, "event", "Test Event")
+        
+        e_with_file = Event.objects.create(title="Test Event 2", file_attachment=self.get_test_file("doc.pdf"))
+        self.client.login(username='staff', password='pwd')
+        resp2 = self.client.get(reverse('delete-event', args=[e_with_file.pk]))
+        self.assertContains(resp2, 'The attached file will also be deleted.')
 
     def test_photo_delete(self):
         p = Photo.objects.create(title="Test Photo", image=self.get_test_file("photo.jpg"))

@@ -4,7 +4,7 @@
 
 {% block content %}
 <nav aria-label="breadcrumb" class="del-breadcrumb">
-    Dashboard &gt; <a href="{{ cancel_url }}" class="del-breadcrumb-link">{{ list_label }}</a> &gt; Delete
+    <a href="{% url 'dashboard' %}" class="del-breadcrumb-link">Dashboard</a> &gt; <a href="{{ cancel_url }}" class="del-breadcrumb-link">{{ list_label }}</a> &gt; Delete
 </nav>
 
 <div class="del-card">
@@ -21,19 +21,15 @@
     <p class="del-subtitle">This cannot be undone.</p>
     
     <div class="del-summary-box">
-        {% for label, value in details %}
-            {% if label == '__thumbnail__' %}
-                <img src="{{ value }}" alt="" class="del-summary-thumb">
-            {% endif %}
-        {% endfor %}
+        {% if thumbnail_url %}
+            <img src="{{ thumbnail_url }}" alt="" class="del-summary-thumb">
+        {% endif %}
         <div class="del-summary-content">
             <p class="del-summary-label">{{ object_label }}</p>
             {% if details %}
             <ul class="del-summary-details">
                 {% for label, value in details %}
-                    {% if label != '__thumbnail__' %}
                     <li>{{ label }}: {{ value }}</li>
-                    {% endif %}
                 {% endfor %}
             </ul>
             {% endif %}

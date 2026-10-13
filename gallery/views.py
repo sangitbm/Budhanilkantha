@@ -49,3 +49,6 @@ class PhotoDeleteView(DashboardDeleteMixin, DeleteView):
         return [
             ('Title', obj.title if obj.title else 'Untitled')
         ]
+
+    def get_thumbnail_url(self, obj):
+        return obj.image.url if obj.image else None

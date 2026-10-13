@@ -73,7 +73,7 @@ class NoticeDeleteView(DashboardDeleteMixin, DeleteView):
     object_type = 'notice'
     list_url_name = 'dashboard-notices'
     list_label = 'Notices'
-    impact = 'It will be removed from the public Notices page and from the scrolling bar. Its attached file is deleted too.'
+    impact = 'It will be removed from the public Notices page and from the scrolling bar.'
 
     def get_details(self, obj):
         details = [
@@ -119,6 +119,8 @@ class EventDeleteView(DashboardDeleteMixin, DeleteView):
         details = []
         if obj.event_date:
             details.append(('Date', obj.event_date.strftime('%b %d, %Y')))
+        else:
+            details.append(('Date', 'No date set'))
         if obj.start_time:
             time_str = obj.start_time.strftime('%I:%M %p')
             if obj.end_time:

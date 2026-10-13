@@ -101,7 +101,7 @@
 .del-icon-circle { width: 44px; height: 44px; border-radius: 50%; background: #fdecea; color: #b42318; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
 .del-title { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin: 0 0 8px; }
 .del-subtitle { color: var(--text-muted); margin: 0 0 24px; }
-.del-summary-box { background: #f6f8fc; border-radius: 12px; padding: 16px; display: flex; gap: 16px; text-align: left; margin-bottom: 24px; }
+.del-summary-box { background: #f6f8fc; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; margin-bottom: 24px; }
 .del-summary-content { flex-grow: 1; }
 .del-summary-label { font-weight: 600; color: var(--text-dark); margin: 0 0 4px; font-size: 1.05rem; }
 .del-summary-details { margin: 0; padding: 0; list-style: none; font-size: 0.9rem; color: var(--text-muted); }
@@ -109,16 +109,17 @@
 .del-summary-thumb { width: 96px; height: 96px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
 .del-impact { background: #fff6f5; border: 1px solid #f3c2bd; border-radius: var(--radius-sm); padding: 12px 16px; display: flex; gap: 12px; align-items: flex-start; text-align: left; color: #7a271a; margin-bottom: 32px; }
 .del-impact svg { flex-shrink: 0; margin-top: 2px; }
-.del-actions { display: flex; gap: 12px; justify-content: flex-end; }
-.del-btn { height: 46px; box-sizing: border-box; border-radius: 23px; padding: 0 24px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; border: 2px solid transparent; }
+.del-actions { display: flex; gap: 12px; justify-content: center; }
+.del-btn { height: 46px; box-sizing: border-box; border-radius: 23px; padding: 0 24px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; border: 2px solid transparent; font: inherit; font-size: .95rem; min-width: 150px; }
 .del-btn-cancel { background: var(--white); border-color: var(--gray-light); color: var(--text-dark); }
 .del-btn-cancel:hover { background: #f8fafc; border-color: #cbd5e1; }
 .del-btn-danger { background: #b42318; color: white; border-color: #b42318; }
 .del-btn-danger:hover { background: #912018; border-color: #912018; }
+.del-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .del-divider { height: 1px; background: var(--gray-light); margin: 32px 0; }
 .del-staff-soft { text-align: left; background: var(--light-bg); border-radius: 12px; padding: 16px; }
 .del-staff-soft p { margin: 0 0 12px; color: var(--text-muted); font-size: 0.95rem; }
-.del-staff-soft-btn { height: 36px; border-radius: 18px; padding: 0 16px; border: 1px solid var(--gray-light); background: var(--white); color: var(--text-dark); cursor: pointer; font-size: 0.9rem; font-weight: 500; }
+.del-staff-soft-btn { height: 36px; border-radius: 18px; padding: 0 16px; border: 1px solid var(--gray-light); background: var(--white); color: var(--text-dark); cursor: pointer; font-weight: 500; font: inherit; font-size: .95rem; }
 .del-staff-soft-btn:hover { background: #f8fafc; }
 @media (max-width: 600px) { .del-actions { flex-direction: column; } .del-btn { width: 100%; } .del-btn-cancel { order: 2; } .del-btn-danger { order: 1; } }
 
