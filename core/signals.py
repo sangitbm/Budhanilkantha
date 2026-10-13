@@ -1,5 +1,4 @@
 from django.db.models.signals import post_delete, pre_save
-from django.dispatch import receiver
 from django.db import transaction
 import logging
 
@@ -34,24 +33,33 @@ def get_file_fields(instance):
     field_names = FILE_FIELDS.get(type(instance), [])
     return [name for name in field_names if getattr(instance, name, None)]
 
-@receiver(post_delete)
 def post_delete_cleanup(sender, instance, **kwargs):
     for field_name in get_file_fields(instance):
         field = getattr(instance, field_name, None)
         delete_file(field)
 
-@receiver(pre_save)
 def pre_save_cleanup(sender, instance, **kwargs):
-    if sender in FILE_FIELDS:
-        if not instance.pk:
-            return
-        try:
-            old_instance = sender.objects.get(pk=instance.pk)
-        except sender.DoesNotExist:
-            return
-        for field_name in FILE_FIELDS[sender]:
-            old_field = getattr(old_instance, field_name, None)
-            new_field = getattr(instance, field_name, None)
-            if old_field and old_field.name:
-                if not new_field or old_field.name != new_field.name:
-                    delete_file(old_field)
+    if kwargs.get('raw'):
+        return
+    if not instance.pk:
+        return
+    update_fields = kwargs.get('update_fields')
+    file_field_names = FILE_FIELDS.get(sender, [])
+    if update_fields is not None and not any(f in update_fields for f in file_field_names):
+        return
+    try:
+        old_instance = sender._default_manager.only(*file_field_names).get(pk=instance.pk)
+    except sender.DoesNotExist:
+        return
+    for field_name in file_field_names:
+        old_field = getattr(old_instance, field_name, None)
+        new_field = getattr(instance, field_name, None)
+        if old_field and old_field.name:
+            if not new_field or old_field.name != new_field.name:
+                delete_file(old_field)
+
+for model in FILE_FIELDS:
+    post_delete.connect(post_delete_cleanup, sender=model,
+                        dispatch_uid=f"file_cleanup_delete_{model._meta.label}")
+    pre_save.connect(pre_save_cleanup, sender=model,
+                     dispatch_uid=f"file_cleanup_save_{model._meta.label}")

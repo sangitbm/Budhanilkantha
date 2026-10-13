@@ -2,6 +2,7 @@ from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.signals import pre_save
 import tempfile
 
 from news.models import Notice, Event
@@ -154,3 +155,41 @@ class DashboardDeleteTests(TransactionTestCase):
             self.assertEqual(get_file_fields(staff), ['custom_file'])
             staff.custom_file = None
             self.assertEqual(get_file_fields(staff), [])
+
+    @unittest.mock.patch('core.signals.delete_file')
+    def test_delete_non_file_model_does_not_call_delete_file(self, mock_delete_file):
+        staff = Staff.objects.create(first_name="Jane", last_name="Smith", designation="Teacher", date_of_joining="2020-01-01")
+        user = User.objects.create_user(username="temp_user", password="pwd")
+        staff.delete()
+        user.delete()
+        mock_delete_file.assert_not_called()
+
+    @unittest.mock.patch('core.signals.delete_file')
+    def test_replace_notice_file_calls_delete_file_once(self, mock_delete_file):
+        notice = Notice.objects.create(title="Notice 1", file_attachment=self.get_test_file("orig.pdf"))
+        mock_delete_file.reset_mock()
+
+        notice.file_attachment = self.get_test_file("new.pdf")
+        notice.save()
+        self.assertEqual(mock_delete_file.call_count, 1)
+
+        mock_delete_file.reset_mock()
+        notice.save()
+        mock_delete_file.assert_not_called()
+
+    @unittest.mock.patch('core.signals.delete_file')
+    def test_pre_save_raw_does_not_call_delete_file(self, mock_delete_file):
+        notice = Notice.objects.create(title="Notice Raw", file_attachment=self.get_test_file("file.pdf"))
+        mock_delete_file.reset_mock()
+        notice.file_attachment = self.get_test_file("new_file.pdf")
+        pre_save.send(sender=Notice, instance=notice, raw=True)
+        mock_delete_file.assert_not_called()
+
+    @unittest.mock.patch('core.signals.delete_file')
+    def test_save_update_fields_skips_delete_file_and_runs_single_update(self, mock_delete_file):
+        notice = Notice.objects.create(title="Old Title", file_attachment=self.get_test_file("keep.pdf"))
+        mock_delete_file.reset_mock()
+        notice.title = "New Title"
+        with self.assertNumQueries(1):
+            notice.save(update_fields=['title'])
+        mock_delete_file.assert_not_called()
