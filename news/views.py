@@ -120,7 +120,7 @@ class EventDeleteView(DashboardDeleteMixin, DeleteView):
         if obj.event_date:
             details.append(('Date', obj.event_date.strftime('%b %d, %Y')))
         else:
-            details.append(('Date', 'No date set'))
+            details.append((None, 'No date set'))
         if obj.start_time:
             time_str = obj.start_time.strftime('%I:%M %p')
             if obj.end_time:

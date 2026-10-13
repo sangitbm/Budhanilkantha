@@ -1,13 +1,14 @@
-from django.db.models.signals import post_delete, pre_save
-from django.db import transaction
 import logging
 
-logger = logging.getLogger(__name__)
+from django.db import transaction
+from django.db.models.signals import post_delete, pre_save
 
-from news.models import Notice, Event
-from gallery.models import Photo
-from records.models import Student
 from core.models import Testimonial, HeroImage, SiteSettings
+from gallery.models import Photo
+from news.models import Notice, Event
+from records.models import Student
+
+logger = logging.getLogger(__name__)
 
 def delete_file(field):
     if field and field.name:

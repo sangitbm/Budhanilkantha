@@ -29,7 +29,7 @@
             {% if details %}
             <ul class="del-summary-details">
                 {% for label, value in details %}
-                    <li>{{ label }}: {{ value }}</li>
+                    <li>{% if label %}{{ label }}: {% endif %}{{ value }}</li>
                 {% endfor %}
             </ul>
             {% endif %}

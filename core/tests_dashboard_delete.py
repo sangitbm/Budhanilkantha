@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.signals import pre_save
+from datetime import date
 import tempfile
 
 from news.models import Notice, Event
@@ -73,7 +74,14 @@ class DashboardDeleteTests(TransactionTestCase):
         self.client.login(username='staff', password='pwd')
         resp = self.client.get(url)
         self.assertNotContains(resp, 'The attached file will also be deleted.')
+        self.assertContains(resp, "No date set")
+        self.assertNotContains(resp, "Date: No date set")
         self.check_delete_view(url, "event", "Test Event")
+
+        e_with_date = Event.objects.create(title="Dated Event", event_date=date(2026, 12, 25))
+        resp_date = self.client.get(reverse('delete-event', args=[e_with_date.pk]))
+        self.assertContains(resp_date, "Date:")
+        self.assertContains(resp_date, "Dec 25, 2026")
         
         e_with_file = Event.objects.create(title="Test Event 2", file_attachment=self.get_test_file("doc.pdf"))
         self.client.login(username='staff', password='pwd')
@@ -85,11 +93,13 @@ class DashboardDeleteTests(TransactionTestCase):
         self.check_delete_view(reverse('delete-photo', args=[p.pk]), "photo", "Test Photo")
 
     def test_student_delete(self):
-        s = Student.objects.create(first_name="John", last_name="Doe", roll_number="123", date_of_birth="2010-01-01", address="Secret Addr")
+        s = Student.objects.create(first_name="John", last_name="Doe", grade="Class 1", roll_number="123", date_of_birth="2010-01-01", address="Secret Addr")
         self.client.login(username='staff', password='pwd')
         resp = self.client.get(reverse('delete-student', args=[s.pk]))
         self.assertNotContains(resp, "2010")
         self.assertNotContains(resp, "Secret")
+        self.assertContains(resp, "Class:")
+        self.assertContains(resp, "Roll Number:")
         self.check_delete_view(reverse('delete-student', args=[s.pk]), "student", "John Doe - 123")
         
     def test_staff_delete(self):
