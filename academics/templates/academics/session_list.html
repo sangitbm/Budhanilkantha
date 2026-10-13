@@ -1,0 +1,87 @@
+{% extends 'core/dashboard_base.html' %}
+{% load static ui %}
+
+{% block title %}Academic Years - Admin Dashboard{% endblock %}
+{% block page_title %}Academic Years{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'add-session' %}" class="btn btn-primary">+ Add Academic Year</a>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/academics.css' %}">
+
+<p class="dl-subtitle">A school year groups terms, classes, attendance, exams and fees.</p>
+
+{% if sessions %}
+<div class="dl-card">
+  <table class="dl-table">
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>Dates</th>
+        <th>Terms</th>
+        <th class="dl-cell-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for session in sessions %}
+      <tr>
+        <td data-label="Year">
+          <strong>{{ session.name }}</strong>
+          {% if session.is_current %}
+          <span class="acd-badge-current">Current</span>
+          {% endif %}
+        </td>
+        <td data-label="Dates">
+          <div class="acd-date-ad">{{ session.start_date|date:"M d, Y" }} – {{ session.end_date|date:"M d, Y" }}</div>
+          <div class="acd-date-bs">{{ session.start_date|bs_date }} – {{ session.end_date|bs_date }}</div>
+        </td>
+        <td data-label="Terms">
+          <div class="acd-terms-count">{{ session.terms.count }} term{{ session.terms.count|pluralize }}</div>
+          {% if session.terms.all %}
+          <div class="acd-terms-list">
+            {% for term in session.terms.all %}
+              {{ term.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </td>
+        <td data-label="Actions" class="dl-cell-actions">
+          <div class="dl-actions">
+            {% if not session.is_current %}
+            <form action="{% url 'set-current-session' session.pk %}" method="post" class="acd-action-form">
+              {% csrf_token %}
+              <button type="submit" class="acd-btn-set-current" aria-label="Set {{ session.name }} as current">
+                Set as current
+              </button>
+            </form>
+            {% endif %}
+            <form action="{% url 'duplicate-session' session.pk %}" method="post" class="acd-action-form">
+              {% csrf_token %}
+              <button type="submit" class="acd-btn-duplicate" title="Create the next year with the same terms" aria-label="Duplicate {{ session.name }}">
+                {% include 'includes/icon.html' with name='copy' %}
+                Duplicate
+              </button>
+            </form>
+            <a href="{% url 'edit-session' session.pk %}" class="dl-btn-icon dl-btn-edit" aria-label="Edit {{ session.name }}">
+              Edit
+            </a>
+            <a href="{% url 'delete-session' session.pk %}" class="acd-btn-delete" aria-label="Delete {{ session.name }}">
+              Delete
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  {% url 'add-session' as add_session_url %}
+  {% include 'includes/dashboard_empty_state.html' with title="No academic years yet" text="Create your first academic year to start adding classes, attendance, exams and fees." action_url=add_session_url action_label="Create academic year" %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}{% endblock %}
+

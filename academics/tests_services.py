@@ -121,11 +121,21 @@ class AcademicServicesTests(TestCase):
         self.assertEqual(self.session.name, "2083")
 
         # 365-day fallback test
-        with patch('nepali_datetime.date.from_datetime_date', side_effect=Exception('BS failed')):
+        copy.delete()
+        with patch('nepali_datetime.date.from_datetime_date', side_effect=ValueError('BS failed')):
             fallback_copy = duplicate_session(self.session)
-            self.assertEqual(fallback_copy.name, "2084 (2)")
+            self.assertEqual(fallback_copy.name, "2084")
             self.assertEqual(fallback_copy.start_date, self.session.start_date + timedelta(days=365))
             self.assertEqual(fallback_copy.end_date, self.session.end_date + timedelta(days=365))
+
+    def test_duplicate_session_overlap_error(self):
+        copy = duplicate_session(self.session)
+        from .services import SessionOverlapError
+        with self.assertRaises(SessionOverlapError) as cm:
+            duplicate_session(self.session)
+        self.assertIn(f"An academic year already covers these dates: {copy.name}.", str(cm.exception))
+        # Ensure nothing extra was created
+        self.assertEqual(AcademicSession.objects.count(), 2)
 
     def test_default_session_dates(self):
         name1, start1, end1 = default_session_dates(date(2026, 4, 14))
@@ -140,7 +150,7 @@ class AcademicServicesTests(TestCase):
         self.assertEqual(end2, next_bs_start - timedelta(days=1))
 
         # Fallback when BS conversion fails
-        with patch('nepali_datetime.date.from_datetime_date', side_effect=Exception('BS failed')):
+        with patch('nepali_datetime.date.from_datetime_date', side_effect=ValueError('BS failed')):
             name_fb, start_fb, end_fb = default_session_dates(date(2026, 4, 14))
             self.assertEqual(name_fb, "2026")
             self.assertEqual(start_fb, date(2026, 1, 1))
@@ -174,8 +184,10 @@ class AcademicServicesTests(TestCase):
         self.session.delete()
         self.assertIsNone(cache.get('current_session'))
 
-        # No current session returns None
+        # No current session returns None and caches None (0 queries on second call)
         self.assertIsNone(get_current_session())
+        with self.assertNumQueries(0):
+            self.assertIsNone(get_current_session())
 
         # Creating/saving term also clears cache
         new_session = AcademicSession.objects.create(
@@ -200,3 +212,43 @@ class AcademicServicesTests(TestCase):
         ctx = current_session(request)
         self.assertIn('current_session', ctx)
         self.assertEqual(ctx['current_session'], self.session)
+
+    def test_suggest_terms(self):
+        from .services import suggest_terms
+        start = date(2026, 4, 14)
+        end = date(2027, 4, 13)
+        terms = suggest_terms(start, end)
+        self.assertEqual(len(terms), 3)
+        self.assertEqual(terms[0]['start_date'], start)
+        self.assertEqual(terms[-1]['end_date'], end)
+        # Check consecutive with no gaps or overlaps
+        for i in range(len(terms) - 1):
+            self.assertEqual(terms[i + 1]['start_date'], terms[i]['end_date'] + timedelta(days=1))
+            self.assertLess(terms[i]['start_date'], terms[i]['end_date'])
+        self.assertEqual([t['order'] for t in terms], [1, 2, 3])
+        self.assertEqual([t['name'] for t in terms], ["First Terminal", "Second Terminal", "Final Terminal"])
+
+    def test_get_current_term(self):
+        from .services import get_current_term
+        # Within term 1
+        t1 = get_current_term(self.session, today=date(2026, 5, 1))
+        self.assertEqual(t1, self.term1)
+
+        # Within term 2
+        t2 = get_current_term(self.session, today=date(2026, 9, 1))
+        self.assertEqual(t2, self.term2)
+
+        # Between or outside terms
+        t_none = get_current_term(self.session, today=date(2027, 1, 1))
+        self.assertIsNone(t_none)
+
+        # No session
+        self.assertIsNone(get_current_term(None))
+
+    def test_days_left(self):
+        from .services import days_left
+        end = date(2026, 4, 20)
+        self.assertEqual(days_left(end, today=date(2026, 4, 10)), 10)
+        self.assertEqual(days_left(end, today=date(2026, 4, 20)), 0)
+        self.assertEqual(days_left(end, today=date(2026, 4, 25)), 0)
+

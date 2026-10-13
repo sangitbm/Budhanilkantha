@@ -51,7 +51,7 @@ def bs_date(value, fmt="default"):
 
     try:
         bs = nepali_datetime.date.from_datetime_date(value)
-    except (ValueError, OverflowError, Exception):
+    except (ValueError, OverflowError):
         return ""
 
     if fmt == "iso":

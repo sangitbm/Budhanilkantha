@@ -128,6 +128,11 @@ def dashboard_index_view(request):
     upcoming_events = Event.objects.filter(Q(event_date__gte=today) | Q(event_date__isnull=True)).order_by('event_date', 'start_time')[:5]
     recent_notices = Notice.objects.all().order_by('-created_at')[:5]
 
+    from academics.services import get_current_session, get_current_term, days_left
+    curr_session = get_current_session()
+    current_term = get_current_term(curr_session, today=today) if curr_session else None
+    days_remaining = days_left(curr_session.end_date, today=today) if curr_session else 0
+
     context = {
         'notices_count': Notice.objects.count(),
         'photos_count': Photo.objects.count(),
@@ -136,6 +141,8 @@ def dashboard_index_view(request):
         'recent_admissions': recent_admissions,
         'upcoming_events': upcoming_events,
         'recent_notices': recent_notices,
+        'current_term': current_term,
+        'days_left': days_remaining,
     }
     return render(request, 'core/dashboard_index.html', context)
 

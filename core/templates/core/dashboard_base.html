@@ -43,6 +43,51 @@
             gap: 12px;
         }
 
+        .sidebar-brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+
+        .sidebar-brand-sub {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .sidebar-logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
         .close-sidebar {
             display: none;
             background: none;
@@ -85,6 +130,62 @@
             bottom: 0;
             width: 3px;
             background: var(--accent);
+        }
+
+        .acd-sidebar-section-label {
+            padding: 16px 24px 6px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.45);
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.02em;
+        }
+
+        .acd-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .acd-header-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            text-decoration: none;
+            line-height: 1.4;
+        }
+
+        .acd-header-chip-current {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .acd-header-chip-current:hover {
+            background: #bbf7d0;
+            color: #14532d;
+        }
+
+        .acd-header-chip-amber {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .acd-header-chip-amber a {
+            color: #b45309;
+            font-weight: 600;
+            text-decoration: underline;
+            margin-left: 4px;
+        }
+
+        .acd-header-chip-amber a:hover {
+            color: #78350f;
         }
 
         .sidebar-footer {
@@ -367,19 +468,18 @@
 
     <aside class="sidebar" id="adminSidebar">
         <div class="sidebar-header">
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="sidebar-brand-wrapper">
                 {% if site_settings.logo %}
-                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.school_short_name }} Logo"
-                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);">
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.school_short_name }} Logo" class="sidebar-logo">
                 {% else %}
-                <div class="logo-icon" style="width: 36px; height: 36px; font-size: 1rem;">
+                <div class="logo-icon">
                     {{ site_settings.school_short_name|slice:":1" }}
                 </div>
                 {% endif %}
 
-                <div style="font-weight: 700; font-size: 1.1rem; line-height: 1.2;">
+                <div class="sidebar-brand-title">
                     {{ site_settings.school_short_name }} Admin
-                    <span style="display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7;">
+                    <span class="sidebar-brand-sub">
                         Dashboard
                     </span>
                 </div>
@@ -423,6 +523,11 @@
                 class="{% if 'admission' in request.resolver_match.url_name %}active{% endif %}">
                 {% include 'includes/icon.html' with name='clipboard' class='sidebar-icon' %} Manage Admissions
             </a>
+            <div class="acd-sidebar-section-label">Academics</div>
+            <a href="{% url 'dashboard-sessions' %}"
+                class="{% if request.resolver_match.url_name == 'dashboard-sessions' or request.resolver_match.url_name == 'add-session' or request.resolver_match.url_name == 'edit-session' or request.resolver_match.url_name == 'delete-session' %}active{% endif %}">
+                {% include 'includes/icon.html' with name='book-open' class='sidebar-icon' %} Academic Years
+            </a>
             <a href="{% url 'dashboard-testimonials' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard-testimonials' or request.resolver_match.url_name == 'testimonial-add' or request.resolver_match.url_name == 'testimonial-edit' %}active{% endif %}">
                 {% include 'includes/icon.html' with name='message-circle' class='sidebar-icon' %} Manage Testimonials
@@ -439,7 +544,7 @@
         <div class="sidebar-footer">
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <button type="submit" class="sidebar-logout-btn">
                     {% include 'includes/icon.html' with name='log-out' class='sidebar-icon' %} Logout
                 </button>
             </form>
@@ -454,18 +559,41 @@
                 </button>
                 <h1 class="dashboard-title">{% block page_title %}Dashboard{% endblock %}</h1>
             </div>
-            {% block header_actions %}{% endblock %}
+            <div class="acd-header-right">
+                {% if current_session %}
+                <a href="{% url 'dashboard-sessions' %}" class="acd-header-chip acd-header-chip-current">
+                    Academic year {{ current_session.name }}
+                </a>
+                {% else %}
+                <span class="acd-header-chip acd-header-chip-amber">
+                    No current academic year <a href="{% url 'dashboard-sessions' %}">Set one</a>
+                </span>
+                {% endif %}
+                {% block header_actions %}{% endblock %}
+            </div>
         </div>
+
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         {% block content %}{% endblock %}
     </main>
 
+    {% block scripts %}
     <script>
         function toggleSidebar() {
             document.getElementById('adminSidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('open');
         }
     </script>
+    {% endblock %}
 </body>
 
 </html>

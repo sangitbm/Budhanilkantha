@@ -1,0 +1,152 @@
+{% extends 'core/dashboard_base.html' %}
+{% load static ui %}
+
+{% block title %}{% if is_edit %}Edit {{ session_obj.name }}{% else %}Add Academic Year{% endif %} - Admin Dashboard{% endblock %}
+{% block page_title %}{% if is_edit %}Edit Academic Year{% else %}Add Academic Year{% endif %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/academics.css' %}">
+
+<div class="acd-page">
+  <div class="acd-breadcrumb">
+    <a href="{% url 'dashboard' %}">Dashboard</a>
+    <span class="acd-breadcrumb-sep">/</span>
+    <a href="{% url 'dashboard-sessions' %}">Academic Years</a>
+    <span class="acd-breadcrumb-sep">/</span>
+    <span>{% if is_edit %}Edit{% else %}Add{% endif %}</span>
+  </div>
+
+  <div class="acd-header">
+    <h1 class="acd-heading">{% if is_edit %}Edit {{ session_obj.name }}{% else %}Add academic year{% endif %}</h1>
+  </div>
+
+  {% if form.errors or formset.errors or formset.non_form_errors %}
+  <div class="acd-error-summary">
+    <div class="acd-error-summary-title">Please correct the errors below:</div>
+    <ul>
+      {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+          <li><strong>{% if field == '__all__' %}Session{% else %}{{ field|capfirst }}{% endif %}:</strong> {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+      {% for error in formset.non_form_errors %}
+        <li><strong>Terms:</strong> {{ error }}</li>
+      {% endfor %}
+      {% for term_form in formset %}
+        {% for field, errors in term_form.errors.items %}
+          {% for error in errors %}
+            <li><strong>Term {{ forloop.parentloop.counter }} ({% if field == '__all__' %}Dates{% else %}{{ field|capfirst }}{% endif %}):</strong> {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Card 1: Academic Year -->
+    <div class="acd-card">
+      <h2 class="acd-card-title">Academic year</h2>
+      <div class="acd-form-row">
+        <div class="acd-form-group">
+          <label class="acd-label" for="{{ form.name.id_for_label }}">Year Name</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+          <div class="acd-field-error">{{ form.name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="acd-form-group">
+          <label class="acd-label" for="{{ form.start_date.id_for_label }}">Start Date</label>
+          {{ form.start_date }}
+          {% if is_edit and session_obj.start_date %}
+          <div class="acd-help-text">{{ session_obj.start_date|bs_date }} in Bikram Sambat</div>
+          {% endif %}
+          {% if form.start_date.errors %}
+          <div class="acd-field-error">{{ form.start_date.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="acd-form-group">
+          <label class="acd-label" for="{{ form.end_date.id_for_label }}">End Date</label>
+          {{ form.end_date }}
+          {% if is_edit and session_obj.end_date %}
+          <div class="acd-help-text">{{ session_obj.end_date|bs_date }} in Bikram Sambat</div>
+          {% endif %}
+          {% if form.end_date.errors %}
+          <div class="acd-field-error">{{ form.end_date.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="acd-checkbox-group">
+        {{ form.make_current }}
+        <label for="{{ form.make_current.id_for_label }}" class="acd-checkbox-label{% if form.make_current.field.disabled %} acd-checkbox-disabled{% endif %}">
+          {{ form.make_current.label }}
+        </label>
+      </div>
+      {% if is_edit and session_obj.is_current %}
+      <div class="acd-help-text">To change the current year, set another year as current.</div>
+      {% endif %}
+    </div>
+
+    <!-- Card 2: Terms -->
+    <div class="acd-card">
+      <h2 class="acd-card-title">Terms</h2>
+      {{ formset.management_form }}
+      <div class="acd-terms-header">
+        <div>Name</div>
+        <div>Starts</div>
+        <div>Ends</div>
+        <div>Order</div>
+        <div>Remove</div>
+      </div>
+      {% for term_form in formset %}
+      <div class="acd-term-row">
+        {% for hidden in term_form.hidden_fields %}
+          {{ hidden }}
+        {% endfor %}
+        <div class="acd-term-field" data-label="Name">
+          {{ term_form.name }}
+          {% if term_form.name.errors %}
+          <div class="acd-field-error">{{ term_form.name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="acd-term-field" data-label="Starts">
+          {{ term_form.start_date }}
+          {% if term_form.start_date.errors %}
+          <div class="acd-field-error">{{ term_form.start_date.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="acd-term-field" data-label="Ends">
+          {{ term_form.end_date }}
+          {% if term_form.end_date.errors %}
+          <div class="acd-field-error">{{ term_form.end_date.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="acd-term-field" data-label="Order">
+          {{ term_form.order }}
+          {% if term_form.order.errors %}
+          <div class="acd-field-error">{{ term_form.order.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="acd-term-remove-cell" data-label="Remove">
+          {% if term_form.instance.pk and formset.can_delete %}
+            {{ term_form.DELETE }}
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <p class="acd-note">Terms must be inside the academic year and must not overlap.</p>
+    </div>
+
+    <div class="acd-form-actions">
+      <button type="submit" class="acd-btn-save">Save academic year</button>
+      <a href="{% url 'dashboard-sessions' %}" class="acd-btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
+

@@ -1,11 +1,18 @@
 import datetime
 import re
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 import nepali_datetime
 
 from .models import AcademicSession, Term
+
+_MISSING = object()
+
+
+class SessionOverlapError(ValidationError):
+    pass
 
 
 @transaction.atomic
@@ -46,11 +53,18 @@ def duplicate_session(session):
         bs = nepali_datetime.date.from_datetime_date(session.start_date)
         next_bs = nepali_datetime.date(bs.year + 1, bs.month, bs.day)
         new_start = next_bs.to_datetime_date()
-    except (ValueError, OverflowError, Exception):
+    except (ValueError, OverflowError):
         new_start = session.start_date + datetime.timedelta(days=365)
 
     delta = new_start - session.start_date
     new_end = session.end_date + delta
+
+    overlapping = AcademicSession.objects.filter(
+        start_date__lte=new_end,
+        end_date__gte=new_start
+    ).first()
+    if overlapping:
+        raise SessionOverlapError(f"An academic year already covers these dates: {overlapping.name}.")
 
     new_session = AcademicSession.objects.create(
         name=name,
@@ -81,7 +95,7 @@ def default_session_dates(today=None):
         next_start = nepali_datetime.date(bs.year + 1, 1, 1).to_datetime_date()
         end = next_start - datetime.timedelta(days=1)
         return (name, start, end)
-    except (ValueError, OverflowError, Exception):
+    except (ValueError, OverflowError):
         name = str(today.year)
         start = datetime.date(today.year, 1, 1)
         end = datetime.date(today.year, 12, 31)
@@ -89,10 +103,48 @@ def default_session_dates(today=None):
 
 
 def get_current_session():
-    cached = cache.get('current_session')
-    if cached is not None:
+    cached = cache.get('current_session', _MISSING)
+    if cached is not _MISSING:
         return cached
     session = AcademicSession.objects.filter(is_current=True).first()
-    if session is not None:
-        cache.set('current_session', session, 300)
+    cache.set('current_session', session, 300)
     return session
+
+
+def suggest_terms(start, end, names=("First Terminal", "Second Terminal", "Final Terminal")):
+    k = len(names)
+    if k == 0:
+        return []
+    total_days = (end - start).days + 1
+    terms = []
+    current_start = start
+    for i, name in enumerate(names):
+        order = i + 1
+        if i == k - 1:
+            term_end = end
+        else:
+            target_days = round((i + 1) * total_days / k)
+            term_end = start + datetime.timedelta(days=target_days - 1)
+        terms.append({
+            'name': name,
+            'start_date': current_start,
+            'end_date': term_end,
+            'order': order,
+        })
+        current_start = term_end + datetime.timedelta(days=1)
+    return terms
+
+
+def get_current_term(session, today=None):
+    if not session:
+        return None
+    if today is None:
+        today = timezone.localdate()
+    return session.terms.filter(start_date__lte=today, end_date__gte=today).first()
+
+
+def days_left(end_date, today=None):
+    if today is None:
+        today = timezone.localdate()
+    diff = (end_date - today).days
+    return max(0, diff)

@@ -1,8 +1,10 @@
 {% extends 'core/dashboard_base.html' %}
+{% load static ui %}
 
 {% block page_title %}Dashboard Overview{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/academics.css' %}">
 <style>
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px; }
   .stat-card { background: var(--light-bg); padding: 24px; border-radius: var(--radius); text-align: center; border-bottom: 4px solid var(--primary); }
@@ -66,7 +68,7 @@
       <li class="list-group-item">
         <div>
           <strong>{{ event.title }}</strong><br>
-          <small class="text-muted">🗓️ {{ event.start_time|date:"M d, Y" }}</small>
+          <small class="text-muted">{% include 'includes/icon.html' with name='calendar' %} {{ event.start_time|date:"M d, Y" }}</small>
         </div>
       </li>
       {% endfor %}
@@ -78,6 +80,41 @@
     <p class="text-muted">No upcoming events scheduled.</p>
     <div style="margin-top: 16px;">
       <a href="{% url 'add-event' %}" class="btn btn-outline btn-sm">+ Add Event</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Current Academic Year -->
+  <div class="card acd-overview-card">
+    <h3 class="acd-overview-title">Current academic year</h3>
+    {% if current_session %}
+    <div class="acd-overview-content">
+      <div class="acd-overview-name">
+        <strong>{{ current_session.name }}</strong>
+        <span class="acd-badge-current">Current</span>
+      </div>
+      <div class="acd-overview-dates">
+        <div>{{ current_session.start_date|date:"M d, Y" }} – {{ current_session.end_date|date:"M d, Y" }}</div>
+        <div class="text-muted">{{ current_session.start_date|bs_date }} – {{ current_session.end_date|bs_date }}</div>
+      </div>
+      <div class="acd-overview-term">
+        {% if current_term %}
+          {{ current_term.name }}
+        {% else %}
+          Between terms
+        {% endif %}
+      </div>
+      <div class="acd-overview-days text-muted">
+        {{ days_left }} days left in the year
+      </div>
+    </div>
+    <div class="acd-overview-footer">
+      <a href="{% url 'dashboard-sessions' %}" class="btn btn-outline btn-sm">Manage Academic Years</a>
+    </div>
+    {% else %}
+    <p class="text-muted">No academic year is currently active.</p>
+    <div class="acd-overview-footer">
+      <a href="{% url 'dashboard-sessions' %}" class="btn btn-outline btn-sm">Set up academic year</a>
     </div>
     {% endif %}
   </div>
