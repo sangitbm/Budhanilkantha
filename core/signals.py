@@ -29,12 +29,16 @@ FILE_FIELDS = {
     SiteSettings: ['logo', 'favicon', 'about_image', 'principal_photo', 'og_image'],
 }
 
+def get_file_fields(instance):
+    """Return the names of file fields on this instance that currently hold a file."""
+    field_names = FILE_FIELDS.get(type(instance), [])
+    return [name for name in field_names if getattr(instance, name, None)]
+
 @receiver(post_delete)
 def post_delete_cleanup(sender, instance, **kwargs):
-    if sender in FILE_FIELDS:
-        for field_name in FILE_FIELDS[sender]:
-            field = getattr(instance, field_name, None)
-            delete_file(field)
+    for field_name in get_file_fields(instance):
+        field = getattr(instance, field_name, None)
+        delete_file(field)
 
 @receiver(pre_save)
 def pre_save_cleanup(sender, instance, **kwargs):

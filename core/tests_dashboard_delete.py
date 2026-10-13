@@ -8,7 +8,9 @@ from news.models import Notice, Event
 from gallery.models import Photo
 from records.models import Student, Staff
 from core.models import Testimonial, AcademicProgram, SiteSettings
+from core.signals import get_file_fields
 import os
+import unittest.mock
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp()
 
@@ -133,3 +135,22 @@ class DashboardDeleteTests(TransactionTestCase):
         
         n3 = Notice.objects.create(title="Test3")
         n3.delete()
+
+    def test_get_file_fields(self):
+        n_with_file = Notice(title="Notice With File", file_attachment=self.get_test_file("notice.pdf"))
+        self.assertEqual(get_file_fields(n_with_file), ['file_attachment'])
+
+        n_without_file = Notice(title="Notice Without File")
+        self.assertEqual(get_file_fields(n_without_file), [])
+
+        s_with_photo = Student(first_name="Alice", photo=self.get_test_file("student.jpg"))
+        self.assertEqual(get_file_fields(s_with_photo), ['photo'])
+
+        staff = Staff(first_name="Bob")
+        self.assertEqual(get_file_fields(staff), [])
+
+        with unittest.mock.patch.dict('core.signals.FILE_FIELDS', {Staff: ['custom_file']}, clear=False):
+            staff.custom_file = self.get_test_file("custom.pdf")
+            self.assertEqual(get_file_fields(staff), ['custom_file'])
+            staff.custom_file = None
+            self.assertEqual(get_file_fields(staff), [])

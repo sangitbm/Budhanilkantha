@@ -1,8 +1,10 @@
+from django.db import models
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 
 from core.permissions import StaffRequiredMixin
+from core.signals import get_file_fields
 
 class DashboardDeleteMixin(StaffRequiredMixin):
     template_name = 'includes/dashboard_delete_shell.html'
@@ -31,11 +33,13 @@ class DashboardDeleteMixin(StaffRequiredMixin):
         context['object_label'] = self.get_object_label(obj)
         context['details'] = self.get_details(obj)
         context['thumbnail_url'] = self.get_thumbnail_url(obj)
-        impact = self.impact
-        if (hasattr(obj, 'photo') and getattr(obj, 'photo')) or (hasattr(obj, 'image') and getattr(obj, 'image')):
-            impact = str(impact) + ' The image will also be deleted.'
-        elif hasattr(obj, 'file_attachment') and getattr(obj, 'file_attachment'):
-            impact = str(impact) + ' The attached file will also be deleted.'
+        impact = self.impact if self.impact is not None else ""
+        file_fields = get_file_fields(obj)
+        if file_fields:
+            if len(file_fields) == 1 and isinstance(obj._meta.get_field(file_fields[0]), models.ImageField):
+                impact += " The image will also be deleted."
+            else:
+                impact += " The attached file will also be deleted."
             
         context['impact'] = impact
         context['cancel_url'] = reverse(self.list_url_name)
