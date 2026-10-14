@@ -2,15 +2,13 @@ from django.views.generic import ListView, DeleteView, View
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.http import HttpResponseNotAllowed
-from django.db import transaction
-from django.forms import inlineformset_factory
+from django.db import transaction, IntegrityError
 
 from core.mixins import DashboardDeleteMixin
 from core.templatetags.ui import bs_date
 from .mixins import AcademicsAccessMixin
 from .models import AcademicSession, Term
-from .forms import AcademicSessionForm, TermFormSet, BaseTermFormSet, TermForm
+from .forms import AcademicSessionForm, make_term_formset
 from .services import (
     set_current_session,
     duplicate_session,
@@ -41,16 +39,8 @@ class SessionCreateView(AcademicsAccessMixin, View):
             'end_date': default_end,
         })
         suggested = suggest_terms(default_start, default_end)
-        TermFormSetInitial = inlineformset_factory(
-            AcademicSession,
-            Term,
-            form=TermForm,
-            formset=BaseTermFormSet,
-            extra=3,
-            can_delete=True,
-            max_num=8,
-        )
-        formset = TermFormSetInitial(
+        formset_cls = make_term_formset(extra=3)
+        formset = formset_cls(
             queryset=Term.objects.none(),
             prefix='terms',
             initial=suggested
@@ -64,19 +54,23 @@ class SessionCreateView(AcademicsAccessMixin, View):
 
     def post(self, request, *args, **kwargs):
         form = AcademicSessionForm(request.POST)
-        formset = TermFormSet(request.POST, prefix='terms')
+        formset_cls = make_term_formset(extra=0)
+        formset = formset_cls(request.POST, prefix='terms')
         formset.session_form = form
 
         if form.is_valid() and formset.is_valid():
-            with transaction.atomic():
-                session = form.save(commit=False)
-                session.save()
-                formset.instance = session
-                formset.save()
-                if form.cleaned_data.get('make_current'):
-                    set_current_session(session)
-            messages.success(request, f"Academic year {session.name} was created.")
-            return redirect('dashboard-sessions')
+            try:
+                with transaction.atomic():
+                    session = form.save(commit=False)
+                    session.save()
+                    formset.instance = session
+                    formset.save()
+                    if form.cleaned_data.get('make_current'):
+                        set_current_session(session)
+                messages.success(request, f"Academic year {session.name} was created.")
+                return redirect('dashboard-sessions')
+            except IntegrityError:
+                pass
 
         context = {
             'form': form,
@@ -92,16 +86,8 @@ class SessionUpdateView(AcademicsAccessMixin, View):
     def get(self, request, pk, *args, **kwargs):
         session = get_object_or_404(AcademicSession, pk=pk)
         form = AcademicSessionForm(instance=session)
-        TermFormSetExtra = inlineformset_factory(
-            AcademicSession,
-            Term,
-            form=TermForm,
-            formset=BaseTermFormSet,
-            extra=2,
-            can_delete=True,
-            max_num=8,
-        )
-        formset = TermFormSetExtra(instance=session, prefix='terms')
+        formset_cls = make_term_formset(extra=2)
+        formset = formset_cls(instance=session, prefix='terms')
         context = {
             'form': form,
             'formset': formset,
@@ -113,18 +99,22 @@ class SessionUpdateView(AcademicsAccessMixin, View):
     def post(self, request, pk, *args, **kwargs):
         session = get_object_or_404(AcademicSession, pk=pk)
         form = AcademicSessionForm(request.POST, instance=session)
-        formset = TermFormSet(request.POST, instance=session, prefix='terms')
+        formset_cls = make_term_formset(extra=0)
+        formset = formset_cls(request.POST, instance=session, prefix='terms')
         formset.session_form = form
 
         if form.is_valid() and formset.is_valid():
-            with transaction.atomic():
-                session = form.save(commit=False)
-                session.save()
-                formset.save()
-                if form.cleaned_data.get('make_current') and not session.is_current:
-                    set_current_session(session)
-            messages.success(request, f"Academic year {session.name} was updated.")
-            return redirect('dashboard-sessions')
+            try:
+                with transaction.atomic():
+                    session = form.save(commit=False)
+                    session.save()
+                    formset.save()
+                    if form.cleaned_data.get('make_current') and not session.is_current:
+                        set_current_session(session)
+                messages.success(request, f"Academic year {session.name} was updated.")
+                return redirect('dashboard-sessions')
+            except IntegrityError:
+                pass
 
         context = {
             'form': form,
@@ -143,14 +133,24 @@ class SessionDeleteView(AcademicsAccessMixin, DashboardDeleteMixin, DeleteView):
     list_label = 'Academic Years'
     impact = 'All of its terms are deleted too.'
 
-    def dispatch(self, request, *args, **kwargs):
-        if not self.test_func():
-            return self.handle_no_permission()
+    def _block_if_current(self, request):
         obj = self.get_object()
         if obj.is_current:
             messages.error(request, f"Set another year as current before deleting {obj.name}.")
             return redirect('dashboard-sessions')
-        return super().dispatch(request, *args, **kwargs)
+        return None
+
+    def get(self, request, *args, **kwargs):
+        block = self._block_if_current(request)
+        if block:
+            return block
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        block = self._block_if_current(request)
+        if block:
+            return block
+        return super().post(request, *args, **kwargs)
 
     def get_details(self, obj):
         term_count = obj.terms.count()
@@ -168,9 +168,6 @@ class SetCurrentSessionView(AcademicsAccessMixin, View):
         messages.success(request, f"{session.name} is now the current academic year.")
         return redirect('dashboard-sessions')
 
-    def get(self, request, *args, **kwargs):
-        return HttpResponseNotAllowed(['POST'])
-
 
 class DuplicateSessionView(AcademicsAccessMixin, View):
     def post(self, request, pk, *args, **kwargs):
@@ -182,6 +179,3 @@ class DuplicateSessionView(AcademicsAccessMixin, View):
         except SessionOverlapError as e:
             messages.error(request, str(e))
         return redirect('dashboard-sessions')
-
-    def get(self, request, *args, **kwargs):
-        return HttpResponseNotAllowed(['POST'])

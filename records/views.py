@@ -4,13 +4,14 @@ from core.permissions import StaffRequiredMixin, staff_required
 from core.mixins import DashboardDeleteMixin
 from .models import Student, Staff
 from .forms import StudentForm, StaffForm
-from django.db.models import Case, When, Value, IntegerField, Q
+from django.db.models import Q, F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 import csv
 from django.utils import timezone
+from academics.models import SchoolClass, Section
 
 # --- Student Views ---
 class StudentListView(StaffRequiredMixin, ListView):
@@ -20,21 +21,33 @@ class StudentListView(StaffRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        
-        whens = [When(grade=value, then=Value(i)) for i, (value, _) in enumerate(Student.GRADE_CHOICES)]
-        qs = qs.annotate(
-            grade_order=Case(
-                *whens,
-                default=Value(999),
-                output_field=IntegerField()
-            )
-        ).order_by('grade_order', 'first_name', 'last_name')
+        qs = super().get_queryset().select_related('school_class', 'section')
+        qs = qs.order_by(
+            F('school_class__order').asc(nulls_last=True),
+            F('school_class__name').asc(nulls_last=True),
+            'first_name',
+            'last_name'
+        )
 
-        grade = self.request.GET.get('grade')
-        if grade in dict(Student.GRADE_CHOICES):
-            qs = qs.filter(grade=grade)
-            
+        class_id = self.request.GET.get('class')
+        selected_class = None
+        if class_id:
+            try:
+                selected_class = SchoolClass.objects.filter(pk=int(class_id)).first()
+            except (ValueError, TypeError):
+                selected_class = None
+
+        if selected_class:
+            qs = qs.filter(school_class=selected_class)
+            section_id = self.request.GET.get('section')
+            if section_id:
+                try:
+                    selected_section = selected_class.sections.filter(pk=int(section_id), is_active=True).first()
+                except (ValueError, TypeError):
+                    selected_section = None
+                if selected_section:
+                    qs = qs.filter(section=selected_section)
+
         q = self.request.GET.get('q', '').strip()
         if q:
             terms = q.split()
@@ -51,20 +64,57 @@ class StudentListView(StaffRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q', '').strip()
-        grade = self.request.GET.get('grade')
-        context['grade'] = grade if grade in dict(Student.GRADE_CHOICES) else ''
-        context['grade_choices'] = Student.GRADE_CHOICES
+
+        class_id = self.request.GET.get('class')
+        selected_class = None
+        sections = Section.objects.none()
+        selected_section = None
+
+        if class_id:
+            try:
+                selected_class = SchoolClass.objects.filter(pk=int(class_id)).first()
+            except (ValueError, TypeError):
+                selected_class = None
+
+        if selected_class:
+            sections = selected_class.sections.filter(is_active=True).order_by('name')
+            section_id = self.request.GET.get('section')
+            if section_id:
+                try:
+                    selected_section = sections.filter(pk=int(section_id)).first()
+                except (ValueError, TypeError):
+                    selected_section = None
+
+        context['classes'] = SchoolClass.objects.filter(is_active=True).order_by('order', 'name')
+        context['selected_class'] = selected_class
+        context['sections'] = sections
+        context['selected_section'] = selected_section
         context['total'] = self.get_queryset().count()
         return context
 
 @staff_required
 def export_students_csv(request):
-    qs = Student.objects.all()
-    
-    grade = request.GET.get('grade')
-    if grade in dict(Student.GRADE_CHOICES):
-        qs = qs.filter(grade=grade)
-        
+    qs = Student.objects.select_related('school_class', 'section')
+
+    class_id = request.GET.get('class')
+    selected_class = None
+    if class_id:
+        try:
+            selected_class = SchoolClass.objects.filter(pk=int(class_id)).first()
+        except (ValueError, TypeError):
+            selected_class = None
+
+    if selected_class:
+        qs = qs.filter(school_class=selected_class)
+        section_id = request.GET.get('section')
+        if section_id:
+            try:
+                selected_section = selected_class.sections.filter(pk=int(section_id), is_active=True).first()
+            except (ValueError, TypeError):
+                selected_section = None
+            if selected_section:
+                qs = qs.filter(section=selected_section)
+
     q = request.GET.get('q', '').strip()
     if q:
         terms = q.split()
@@ -76,30 +126,31 @@ def export_students_csv(request):
                 Q(guardian_name__icontains=term) |
                 Q(contact_number__icontains=term)
             )
-            
-    whens = [When(grade=value, then=Value(i)) for i, (value, _) in enumerate(Student.GRADE_CHOICES)]
-    qs = qs.annotate(
-        grade_order=Case(
-            *whens,
-            default=Value(999),
-            output_field=IntegerField()
-        )
-    ).order_by('grade_order', 'first_name', 'last_name')
-    
+
+    qs = qs.order_by(
+        F('school_class__order').asc(nulls_last=True),
+        F('school_class__name').asc(nulls_last=True),
+        'first_name',
+        'last_name'
+    )
+
     response = HttpResponse(content_type='text/csv')
     filename = f"students-{timezone.localdate().strftime('%Y-%m-%d')}.csv"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    
+
     writer = csv.writer(response)
-    writer.writerow(['Roll no', 'First name', 'Last name', 'Gender', 'Grade', 'Guardian', 'Contact'])
-    
+    writer.writerow(['Roll no', 'First name', 'Last name', 'Gender', 'Class', 'Section', 'Guardian', 'Contact'])
+
     for student in qs:
+        class_name = student.school_class.name if student.school_class else (student.grade or "")
+        section_name = student.section.name if student.section else ""
         row = [
             student.roll_number,
             student.first_name,
             student.last_name,
             student.gender,
-            student.get_grade_display(),
+            class_name,
+            section_name,
             student.guardian_name,
             student.contact_number
         ]
@@ -110,7 +161,7 @@ def export_students_csv(request):
                 cell_str = "'" + cell_str
             safe_row.append(cell_str)
         writer.writerow(safe_row)
-        
+
     return response
 
 class StudentCreateView(StaffRequiredMixin, CreateView):
@@ -118,7 +169,7 @@ class StudentCreateView(StaffRequiredMixin, CreateView):
     form_class = StudentForm
     template_name = 'records/student_form.html'
     success_url = reverse_lazy('dashboard-students')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['record_type'] = 'Student'
@@ -129,7 +180,7 @@ class StudentUpdateView(StaffRequiredMixin, UpdateView):
     form_class = StudentForm
     template_name = 'records/student_form.html'
     success_url = reverse_lazy('dashboard-students')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['record_type'] = 'Student'
@@ -144,8 +195,15 @@ class StudentDeleteView(DashboardDeleteMixin, DeleteView):
     impact = "This student's record is permanently deleted."
 
     def get_details(self, obj):
+        if obj.school_class and obj.section:
+            class_str = f"{obj.school_class.name} - {obj.section.name}"
+        elif obj.school_class:
+            class_str = obj.school_class.name
+        else:
+            class_str = obj.grade or ""
+
         details = [
-            ('Class', obj.get_grade_display()),
+            ('Class', class_str),
             ('Roll Number', obj.roll_number),
             ('Guardian', obj.guardian_name),
         ]

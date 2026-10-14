@@ -44,7 +44,12 @@ def bs_date(value, fmt="default"):
     import datetime
     import nepali_datetime
 
-    if isinstance(value, datetime.datetime):
+    if isinstance(value, str):
+        try:
+            value = datetime.date.fromisoformat(value)
+        except (ValueError, TypeError):
+            return ""
+    elif isinstance(value, datetime.datetime):
         value = value.date()
     elif not isinstance(value, datetime.date):
         return ""

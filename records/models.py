@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+
 
 class Student(models.Model):
     GENDER_CHOICES = (
@@ -7,33 +9,26 @@ class Student(models.Model):
         ('Other', 'Other'),
     )
 
-    GRADE_CHOICES = (
-        ('Class 1', 'Class 1'),
-        ('Class 2', 'Class 2'),
-        ('Class 3', 'Class 3'),
-        ('Class 4', 'Class 4'),
-        ('Class 5', 'Class 5'),
-        ('Class 6', 'Class 6'),
-        ('Class 7', 'Class 7'),
-        ('Class 8', 'Class 8'),
-        ('Class 9', 'Class 9'),
-        ('Class 10', 'Class 10 (SEE)'),
-        ('Class 11 Science', 'Class 11 - Science'),
-        ('Class 11 Management', 'Class 11 - Management'),
-        ('Class 11 Humanities', 'Class 11 - Humanities'),
-        ('Class 12 Science', 'Class 12 - Science'),
-        ('Class 12 Management', 'Class 12 - Management'),
-        ('Class 12 Humanities', 'Class 12 - Humanities'),
-        ('A-Level (AS)', 'Cambridge A-Level (AS)'),
-        ('A-Level (A2)', 'Cambridge A-Level (A2)'),
-        ('Grade 1', 'Grade 1'),
-    )
-
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='Male')
     photo = models.ImageField(upload_to='students/', blank=True, null=True)
-    grade = models.CharField(max_length=50, choices=GRADE_CHOICES, help_text="Select student grade/class")
+    school_class = models.ForeignKey(
+        'academics.SchoolClass',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='students',
+    )
+    section = models.ForeignKey(
+        'academics.Section',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='students',
+    )
+    # Derived legacy field; Phase 2 removes this field.
+    grade = models.CharField(max_length=60, blank=True, editable=False)
     roll_number = models.CharField(max_length=20, unique=True)
     date_of_birth = models.DateField()
     guardian_name = models.CharField(max_length=200)
@@ -43,6 +38,18 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.roll_number}"
+
+    def clean(self):
+        super().clean()
+        if self.section_id:
+            if not self.school_class_id or self.section.school_class_id != self.school_class_id:
+                raise ValidationError({'section': f"This section belongs to {self.section.school_class.name}."})
+
+    def save(self, *args, **kwargs):
+        if self.school_class:
+            self.grade = self.school_class.name
+        super().save(*args, **kwargs)
+
 
 class Staff(models.Model):
     STAFF_TYPES = (

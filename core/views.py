@@ -125,7 +125,13 @@ def staff_directory_view(request):
 def dashboard_index_view(request):
     today = timezone.now().date()
     recent_admissions = AdmissionInquiry.objects.all().order_by('-submitted_at')[:5]
-    upcoming_events = Event.objects.filter(Q(event_date__gte=today) | Q(event_date__isnull=True)).order_by('event_date', 'start_time')[:5]
+    upcoming_events = Event.objects.filter(
+        Q(event_date__gte=today) | Q(event_date__isnull=True)
+    ).order_by(
+        F('event_date').asc(nulls_last=True),
+        F('start_time').asc(nulls_last=True),
+        'title'
+    )[:5]
     recent_notices = Notice.objects.all().order_by('-created_at')[:5]
 
     from academics.services import get_current_session, get_current_term, days_left

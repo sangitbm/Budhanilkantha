@@ -46,6 +46,18 @@ def next_session_name(name):
     return candidate
 
 
+def find_overlapping_session(start, end, exclude_pk=None):
+    if not (start and end):
+        return None
+    qs = AcademicSession.objects.filter(
+        start_date__lte=end,
+        end_date__gte=start
+    )
+    if exclude_pk:
+        qs = qs.exclude(pk=exclude_pk)
+    return qs.first()
+
+
 @transaction.atomic
 def duplicate_session(session):
     name = next_session_name(session.name)
@@ -59,10 +71,7 @@ def duplicate_session(session):
     delta = new_start - session.start_date
     new_end = session.end_date + delta
 
-    overlapping = AcademicSession.objects.filter(
-        start_date__lte=new_end,
-        end_date__gte=new_start
-    ).first()
+    overlapping = find_overlapping_session(new_start, new_end)
     if overlapping:
         raise SessionOverlapError(f"An academic year already covers these dates: {overlapping.name}.")
 

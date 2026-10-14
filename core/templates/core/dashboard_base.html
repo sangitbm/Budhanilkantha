@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard_lists.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard_shell.css' %}">
     <style>
         body {
             background-color: var(--light-bg);
@@ -130,62 +131,6 @@
             bottom: 0;
             width: 3px;
             background: var(--accent);
-        }
-
-        .acd-sidebar-section-label {
-            padding: 16px 24px 6px;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.45);
-            font-weight: 500;
-            text-transform: none;
-            letter-spacing: 0.02em;
-        }
-
-        .acd-header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .acd-header-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 12px;
-            border-radius: 9999px;
-            font-size: 0.82rem;
-            font-weight: 500;
-            text-decoration: none;
-            line-height: 1.4;
-        }
-
-        .acd-header-chip-current {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-
-        .acd-header-chip-current:hover {
-            background: #bbf7d0;
-            color: #14532d;
-        }
-
-        .acd-header-chip-amber {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
-        }
-
-        .acd-header-chip-amber a {
-            color: #b45309;
-            font-weight: 600;
-            text-decoration: underline;
-            margin-left: 4px;
-        }
-
-        .acd-header-chip-amber a:hover {
-            color: #78350f;
         }
 
         .sidebar-footer {
@@ -523,7 +468,7 @@
                 class="{% if 'admission' in request.resolver_match.url_name %}active{% endif %}">
                 {% include 'includes/icon.html' with name='clipboard' class='sidebar-icon' %} Manage Admissions
             </a>
-            <div class="acd-sidebar-section-label">Academics</div>
+            <div class="dash-sidebar-section-label">Academics</div>
             <a href="{% url 'dashboard-sessions' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard-sessions' or request.resolver_match.url_name == 'add-session' or request.resolver_match.url_name == 'edit-session' or request.resolver_match.url_name == 'delete-session' %}active{% endif %}">
                 {% include 'includes/icon.html' with name='book-open' class='sidebar-icon' %} Academic Years
@@ -559,13 +504,13 @@
                 </button>
                 <h1 class="dashboard-title">{% block page_title %}Dashboard{% endblock %}</h1>
             </div>
-            <div class="acd-header-right">
+            <div class="dash-header-right">
                 {% if current_session %}
-                <a href="{% url 'dashboard-sessions' %}" class="acd-header-chip acd-header-chip-current">
+                <a href="{% url 'dashboard-sessions' %}" class="dash-header-chip dash-header-chip-current">
                     Academic year {{ current_session.name }}
                 </a>
                 {% else %}
-                <span class="acd-header-chip acd-header-chip-amber">
+                <span class="dash-header-chip dash-header-chip-amber">
                     No current academic year <a href="{% url 'dashboard-sessions' %}">Set one</a>
                 </span>
                 {% endif %}
@@ -585,15 +530,6 @@
 
         {% block content %}{% endblock %}
     </main>
-
-    {% block scripts %}
-    <script>
-        function toggleSidebar() {
-            document.getElementById('adminSidebar').classList.toggle('open');
-            document.getElementById('sidebarOverlay').classList.toggle('open');
-        }
-    </script>
-    {% endblock %}
 </body>
 
 </html>

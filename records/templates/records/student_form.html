@@ -419,14 +419,24 @@
                         </div>
                     </div>
 
-                    <!-- Grade Dropdown -->
-                    <div class="ef-form-group" style="margin-bottom: 0;">
-                        <div class="ef-label-row">
-                            <label class="ef-label" for="{{ form.grade.id_for_label }}">Class / Grade <span class="ef-label-req">*</span></label>
-                            <span class="ef-label-hint">Dropdown selector</span>
+                    <!-- Class and Section Dropdowns -->
+                    <div class="ef-row" style="margin-bottom: 0;">
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.school_class.id_for_label }}">Class <span class="ef-label-req">*</span></label>
+                            </div>
+                            {{ form.school_class }}
+                            {% if form.school_class.errors %}<div class="ef-field-error">{{ form.school_class.errors.0 }}</div>{% endif %}
                         </div>
-                        {{ form.grade }}
-                        {% if form.grade.errors %}<div class="ef-field-error">{{ form.grade.errors.0 }}</div>{% endif %}
+
+                        <div class="ef-form-group" style="margin-bottom: 0;">
+                            <div class="ef-label-row">
+                                <label class="ef-label" for="{{ form.section.id_for_label }}">Section</label>
+                                <span class="ef-label-hint">Optional</span>
+                            </div>
+                            {{ form.section }}
+                            {% if form.section.errors %}<div class="ef-field-error">{{ form.section.errors.0 }}</div>{% endif %}
+                        </div>
                     </div>
                 </div>
 

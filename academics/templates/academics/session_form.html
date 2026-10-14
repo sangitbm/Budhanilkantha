@@ -16,26 +16,28 @@
     <span>{% if is_edit %}Edit{% else %}Add{% endif %}</span>
   </div>
 
-  <div class="acd-header">
-    <h1 class="acd-heading">{% if is_edit %}Edit {{ session_obj.name }}{% else %}Add academic year{% endif %}</h1>
-  </div>
-
   {% if form.errors or formset.errors or formset.non_form_errors %}
   <div class="acd-error-summary">
     <div class="acd-error-summary-title">Please correct the errors below:</div>
     <ul>
-      {% for field, errors in form.errors.items %}
-        {% for error in errors %}
-          <li><strong>{% if field == '__all__' %}Session{% else %}{{ field|capfirst }}{% endif %}:</strong> {{ error }}</li>
+      {% for field in form %}
+        {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
         {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+        <li><strong>Academic year:</strong> {{ error }}</li>
       {% endfor %}
       {% for error in formset.non_form_errors %}
         <li><strong>Terms:</strong> {{ error }}</li>
       {% endfor %}
       {% for term_form in formset %}
-        {% for field, errors in term_form.errors.items %}
-          {% for error in errors %}
-            <li><strong>Term {{ forloop.parentloop.counter }} ({% if field == '__all__' %}Dates{% else %}{{ field|capfirst }}{% endif %}):</strong> {{ error }}</li>
+        {% for error in term_form.non_field_errors %}
+          <li><strong>Term {{ forloop.counter }}:</strong> {{ error }}</li>
+        {% endfor %}
+        {% for field in term_form %}
+          {% for error in field.errors %}
+            <li><strong>Term {{ forloop.parentloop.counter }} ({% if field.name == 'start_date' %}Starts{% elif field.name == 'end_date' %}Ends{% elif field.name == 'name' %}Name{% elif field.name == 'order' %}Order{% else %}{{ field.label }}{% endif %}):</strong> {{ error }}</li>
           {% endfor %}
         {% endfor %}
       {% endfor %}
@@ -51,27 +53,27 @@
       <h2 class="acd-card-title">Academic year</h2>
       <div class="acd-form-row">
         <div class="acd-form-group">
-          <label class="acd-label" for="{{ form.name.id_for_label }}">Year Name</label>
+          <label class="acd-label" for="{{ form.name.id_for_label }}">Year name</label>
           {{ form.name }}
           {% if form.name.errors %}
           <div class="acd-field-error">{{ form.name.errors.0 }}</div>
           {% endif %}
         </div>
         <div class="acd-form-group">
-          <label class="acd-label" for="{{ form.start_date.id_for_label }}">Start Date</label>
+          <label class="acd-label" for="{{ form.start_date.id_for_label }}">Start date</label>
           {{ form.start_date }}
-          {% if is_edit and session_obj.start_date %}
-          <div class="acd-help-text">{{ session_obj.start_date|bs_date }} in Bikram Sambat</div>
+          {% if form.start_date.value and form.start_date.value|bs_date %}
+          <div class="acd-help-text">{{ form.start_date.value|bs_date }} in Bikram Sambat</div>
           {% endif %}
           {% if form.start_date.errors %}
           <div class="acd-field-error">{{ form.start_date.errors.0 }}</div>
           {% endif %}
         </div>
         <div class="acd-form-group">
-          <label class="acd-label" for="{{ form.end_date.id_for_label }}">End Date</label>
+          <label class="acd-label" for="{{ form.end_date.id_for_label }}">End date</label>
           {{ form.end_date }}
-          {% if is_edit and session_obj.end_date %}
-          <div class="acd-help-text">{{ session_obj.end_date|bs_date }} in Bikram Sambat</div>
+          {% if form.end_date.value and form.end_date.value|bs_date %}
+          <div class="acd-help-text">{{ form.end_date.value|bs_date }} in Bikram Sambat</div>
           {% endif %}
           {% if form.end_date.errors %}
           <div class="acd-field-error">{{ form.end_date.errors.0 }}</div>
@@ -148,5 +150,4 @@
 </div>
 {% endblock %}
 
-{% block scripts %}{% endblock %}
 

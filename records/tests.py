@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from academics.models import SchoolClass
 from .models import Student
 
 User = get_user_model()
@@ -14,6 +15,8 @@ class StudentFormAndModelTests(TestCase):
             is_staff=True
         )
         self.client.login(username='stafftest', password='password123')
+        self.class10, _ = SchoolClass.objects.get_or_create(name="Class 10 (SEE)", defaults={"level": "secondary", "order": 140})
+        self.class11, _ = SchoolClass.objects.get_or_create(name="Class 11 - Science", defaults={"level": "higher_secondary", "stream": "Science", "order": 150})
 
     def test_student_model_creation_with_gender_and_photo(self):
         test_image = SimpleUploadedFile("avatar.jpg", b"\x47\x49\x46\x38\x39\x61", content_type="image/jpeg")
@@ -21,7 +24,7 @@ class StudentFormAndModelTests(TestCase):
             first_name="Aarav",
             last_name="Shrestha",
             gender="Male",
-            grade="Class 10",
+            school_class=self.class10,
             roll_number="2026-001",
             date_of_birth="2010-05-15",
             guardian_name="Ramesh Shrestha",
@@ -30,7 +33,7 @@ class StudentFormAndModelTests(TestCase):
             photo=test_image
         )
         self.assertEqual(student.gender, "Male")
-        self.assertEqual(student.grade, "Class 10")
+        self.assertEqual(student.grade, "Class 10 (SEE)")
         self.assertTrue(bool(student.photo))
         self.assertIn("Aarav Shrestha", str(student))
 
@@ -49,7 +52,7 @@ class StudentFormAndModelTests(TestCase):
             'first_name': 'Prashant',
             'last_name': 'Sharma',
             'gender': 'Male',
-            'grade': 'Class 11 Science',
+            'school_class': str(self.class11.pk),
             'roll_number': '2026-002',
             'date_of_birth': '2008-01-10',
             'guardian_name': 'Bikash Sharma',
@@ -59,3 +62,4 @@ class StudentFormAndModelTests(TestCase):
         response = self.client.post(url, post_data)
         self.assertRedirects(response, reverse('dashboard-students'))
         self.assertTrue(Student.objects.filter(roll_number='2026-002').exists())
+

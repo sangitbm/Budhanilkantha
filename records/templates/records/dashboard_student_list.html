@@ -18,15 +18,24 @@
       {% include 'includes/icon.html' with name='search' class="dl-search-icon" %}
       <input type="search" name="q" id="id_search" class="dl-search-input" value="{{ q }}" placeholder="Search students...">
     </div>
-    <label for="id_grade" class="dl-sr-only">Grade</label>
-    <select name="grade" id="id_grade" class="dl-search-input">
-      <option value="">All grades</option>
-      {% for grade_val, grade_label in grade_choices %}
-      <option value="{{ grade_val }}" {% if grade == grade_val %}selected{% endif %}>{{ grade_label }}</option>
+    <label for="id_class" class="dl-sr-only">Class</label>
+    <select name="class" id="id_class" class="dl-search-input">
+      <option value="">All classes</option>
+      {% for c in classes %}
+      <option value="{{ c.pk }}" {% if selected_class and selected_class.pk == c.pk %}selected{% endif %}>{{ c.name }}</option>
       {% endfor %}
     </select>
+    {% if selected_class and sections %}
+    <label for="id_section" class="dl-sr-only">Section</label>
+    <select name="section" id="id_section" class="dl-search-input">
+      <option value="">All sections</option>
+      {% for s in sections %}
+      <option value="{{ s.pk }}" {% if selected_section and selected_section.pk == s.pk %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
     <button type="submit" class="btn btn-primary dl-search-btn">Search</button>
-    {% if q or grade %}
+    {% if q or selected_class %}
     <a href="?" class="dl-search-clear">Clear</a>
     {% endif %}
   </form>
@@ -34,13 +43,13 @@
     {% if total > 0 %}
     <span class="dl-search-count">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ total }} students</span>
     {% endif %}
-    <a href="{% url 'students-export' %}?q={{ q|urlencode }}&grade={{ grade|urlencode }}" class="btn btn-outline dl-export-btn">
+    <a href="{% url 'students-export' %}?q={{ q|urlencode }}&class={{ selected_class.pk|default:'' }}&section={{ selected_section.pk|default:'' }}" class="btn btn-outline dl-export-btn">
        {% include 'includes/icon.html' with name='download' %} Export CSV
     </a>
   </div>
 </div>
 
-{% if students or q or grade %}
+{% if students or q or selected_class %}
   {% if students %}
   <div class="dl-card">
     <table class="dl-table">
@@ -48,7 +57,7 @@
       <thead>
         <tr>
           <th scope="col">Student</th>
-          <th scope="col" class="dl-cell-grade">Grade</th>
+          <th scope="col" class="dl-cell-grade">Class</th>
           <th scope="col" class="dl-cell-gender">Gender</th>
           <th scope="col">Guardian</th>
           <th scope="col" class="dl-cell-actions">Actions</th>
@@ -72,8 +81,12 @@
               </div>
             </div>
           </td>
-          <td data-label="Grade" class="dl-cell-grade">
-            {{ student.get_grade_display }}
+          <td data-label="Class" class="dl-cell-grade">
+            {% if student.school_class %}
+              {{ student.school_class.name }}{% if student.section %} - {{ student.section.name }}{% endif %}
+            {% else %}
+              {{ student.grade }}
+            {% endif %}
           </td>
           <td data-label="Gender" class="dl-cell-gender">
             {{ student.gender }}
@@ -107,6 +120,6 @@
   </div>
   {% endif %}
 {% else %}
-  {% include 'includes/dashboard_empty_state.html' with title="No students yet" text="Add students to keep their grade, roll number and guardian contact in one place." action_url="/records/dashboard/students/add/" action_label="Add your first student" %}
+  {% include 'includes/dashboard_empty_state.html' with title="No students yet" text="Add students to keep their class, roll number and guardian contact in one place." action_url="/records/dashboard/students/add/" action_label="Add your first student" %}
 {% endif %}
 {% endblock %}

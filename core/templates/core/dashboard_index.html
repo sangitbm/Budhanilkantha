@@ -68,7 +68,14 @@
       <li class="list-group-item">
         <div>
           <strong>{{ event.title }}</strong><br>
-          <small class="text-muted">{% include 'includes/icon.html' with name='calendar' %} {{ event.start_time|date:"M d, Y" }}</small>
+          <small class="text-muted">
+            {% include 'includes/icon.html' with name='calendar' %}
+            {% if event.event_date %}
+              {{ event.event_date|date:"M d, Y" }}{% if event.start_time %} {{ event.start_time|time:"g:i A" }}{% endif %}
+            {% else %}
+              Date to be announced
+            {% endif %}
+          </small>
         </div>
       </li>
       {% endfor %}
@@ -105,7 +112,7 @@
         {% endif %}
       </div>
       <div class="acd-overview-days text-muted">
-        {{ days_left }} days left in the year
+        {{ days_left }} day{{ days_left|pluralize }} left in the year
       </div>
     </div>
     <div class="acd-overview-footer">
